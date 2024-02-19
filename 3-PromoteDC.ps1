@@ -437,7 +437,7 @@ if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {
     $NextFile = '{0}\{1}' -f $DMscripts, $file
     $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument $Arguments
+    $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
     $Splat = @{
         Action      = $TaskAction
@@ -463,7 +463,7 @@ if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {
     $NextFile = '{0}\{1}' -f $DMscripts, $file
     $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument $Arguments
+    $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
     $Splat = @{
         Action      = $TaskAction

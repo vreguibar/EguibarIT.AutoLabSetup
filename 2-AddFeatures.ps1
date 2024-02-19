@@ -255,7 +255,7 @@ $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
 $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-$TaskAction = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument $Arguments
+$TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
 $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 

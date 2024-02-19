@@ -70,6 +70,10 @@ $ConfigJSON = ConvertTo-Json -InputObject @{
 $ConfigJSON | Out-File -Force $ConfigPath
 #>
 
+# https://learn.microsoft.com/en-us/archive/blogs/adpowershell/disable-loading-the-default-drive-ad-during-import-module
+$Env:ADPS_LoadDefaultDrive = 0
+
+
 $AllModules = @(
     'ActiveDirectory',
     'EguibarIT',
@@ -621,7 +625,7 @@ Set-ItemProperty -Path $regkeyPath -Name 'ForceAutoLogon' -Value 1
 
   $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-  $TaskAction = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument $Arguments
+  $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
   $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 

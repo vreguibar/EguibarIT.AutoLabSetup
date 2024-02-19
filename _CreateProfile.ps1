@@ -225,7 +225,7 @@ $ScriptBlock = {
 
     $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument $Arguments
+    $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
     $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
@@ -279,7 +279,7 @@ If ($CurrentSession.State -ne 'Opened') {
 #### Copy-Item might throw an error (Exception setting "Attributes": "Cannot convert value "525344" to type "System.IO.FileAttributes")
 ### but will copy file. This is due file "flag" to sync with OneDrive.
 # Provide the path where local files are located
-$SourceFiles = 'C:\Users\RODRIGUEZEGUIBARVice\OneDrive - EguibarIT\_Scripts\LabSetup\SourceDC'
+$SourceFiles = 'C:\Users\RODRIGUEZEGUIBARVice\OneDrive - EguibarIT\_Scripts\LabSetup\SourceDC\EguibarIT.AutoLabSetup'
 
 
 #To $Scripts directory
