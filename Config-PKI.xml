@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+ <N>
+    <CA>
+        <CAType>EnterpriseRootCA</CAType>
+        <CAValidity>16</CAValidity>
+        <CAKeyLength>4096</CAKeyLength>
+        <CACryptoProvider>RSA#Microsoft Software Key Storage Provider</CACryptoProvider>
+        <CAHashAlgorithm>sha384</CAHashAlgorithm>
+        <CACertValidity>2</CACertValidity>
+        <CACRLPeriodUnits>26</CACRLPeriodUnits>
+        <CACRLPeriod>Weeks</CACRLPeriod>
+        <CACRLDeltaPeriodUnits>0</CACRLDeltaPeriodUnits>
+        <CACRLDeltaPeriod>Days</CACRLDeltaPeriod>
+        <CACDP>C:\CAConfig\&lt;CaName&gt;&lt;CRLNameSuffix&gt;.crl
+
+ldap:///CN=&lt;CATruncatedName&gt;&lt;CRLNameSuffix&gt;,CN=&lt;ServerShortName&gt;,CN=CDP,CN=Public Key Services,CN=Services,&lt;ConfigurationContainer&gt;&lt;CDPObjectClass&gt;</CACDP>
+        <CAAIA>C:\CAConfig\&lt;CaName&gt;&lt;CertificateName&gt;.crt
+
+ldap:///CN=&lt;CATruncatedName&gt;,CN=AIA,CN=Public Key Services,CN=Services,&lt;ConfigurationContainer&gt;&lt;CAObjectClass&gt;</CAAIA>
+        <CAPath>DC=Local,DC=EguibarIT,DC=FR,CN=RF Enterprise Root CA</CAPath>
+    </CA>
+    <Domains>
+        <Prod>
+            <NETBiosName>EguibarIT</NETBiosName>
+            <DnsDomainName>EguibarIT.local</DnsDomainName>
+            <CreateExContainers>False</CreateExContainers>
+            <CreateDFS>True</CreateDFS>
+            <CreateCA>False</CreateCA>
+            <CreateDHCP>True</CreateDHCP>
+            <CreateAGPM>True</CreateAGPM>
+            <CreateLAPS>True</CreateLAPS>
+        </Prod>
+    </Domains>
+     <DefaultPassword>P@ssword 123456</DefaultPassword>
+     <!-- Naming Conventions -->
+     <NC>
+       <Delimiter>_</Delimiter>
+       <LocalDomainGroupPreffix>SL</LocalDomainGroupPreffix>
+       <GlobalGroupPreffix>SG</GlobalGroupPreffix>
+       <UniversalGroupPreffix>SU</UniversalGroupPreffix>
+       <AdminAccSufix0>T0</AdminAccSufix0>
+       <AdminAccSufix1>T1</AdminAccSufix1>
+       <AdminAccSufix2>T2</AdminAccSufix2>
+       <!--
+        #Open the configuration XML file
+        $configXML = [xml](Get-Content (Join-Path -Path $DMscripts -ChildPath Config.xml -Resolve))
+
+
+# Naming conventions hashtable
+$NC = @{"sl"    = $confXML.n.NC.LocalDomainGroupPreffix;
+        "sg"    = $confXML.n.NC.GlobalGroupPreffix;
+        "su"    = $confXML.n.NC.UniversalGroupPreffix;
+        "Delim" = $confXML.n.NC.Delimiter;
+        "T0"    = $confXML.n.NC.AdminAccSufix0;
+        "T1"    = $confXML.n.NC.AdminAccSufix1;
+        "T2"    = $confXML.n.NC.AdminAccSufix2
+}
+# The following code
+#('{0}{1}{2}{1}{3}' -f $NC["sg"], $NC["Delim"], $configXML.Config.Administration.lg.PAWM, $NC["T0"])
+# will produce SG_PAWM_T0
+       -->
+     </NC>
+ </N>

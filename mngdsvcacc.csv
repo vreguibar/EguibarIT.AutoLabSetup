@@ -1,0 +1,14 @@
+Description;Name;DisplayName;MemberOf;Tier
+Service Account for 4LegWalking Droid;MSA_AtAtWalker;At-At-Walker Droid;;0
+Service Account for AstroMechanic Droid;MSA_R2D2;R2D2 Droid;The Empire Strikes Back, Attack of the Clones, The Phantom Menace, Revenge of the Sith, Return of the Jedi, A New Hope, The Force Awakens;0
+Service Account for BB Unit work tirelessly to keep the weapons and vessels of the Resistance in top combat condition;MSA_BB8Drd;BB8 Droid;The Force Awakens;0
+Service Account for Prob Droid;MSA_ProbeDrd;Probe Droid;;0
+Service Account for 2LegWalking Droid;MSA_AtStWalker;At-St-Walker Droid;;1
+Service Account for Protocol Droid;MSA_C3PO;C3PO Droid;The Empire Strikes Back, Attack of the Clones, The Phantom Menace, Revenge of the Sith, Return of the Jedi, A New Hope;1
+Service Account for RacingPit Droid;MSA_PitDrd;Pit Droid;;1
+Service Account for Servo-O-Droid autovalet droids ensure the uniforms of First Order officers are delivered clean, pressed and folded according to the regime?s exacting regulations;MSA_SO-1PDrd;SO-1P Droid;;1
+Service Account for 21B medical wonders, programmed to diagnose and treat injuries and diseases that afflicted millions of species in the galaxy;MSA_21BDrd;21B Droid;;2
+Service Account for B1 series Battle Droid;MSA_BattleDrd;Battle Droid;;2
+Service Account for EKA Droid;MSA_DrdEKA;Droid EKA;;2
+Service Account for SuperBattle Droid;MSA_SupBattDrd;SupBatt Droid;;2
+Group Managed Service Account used by Domain Controllers to securely run scheduled tasks.;gMSA_AdTskSchd;AD Task Scheduler Group Managed Service Account;;0

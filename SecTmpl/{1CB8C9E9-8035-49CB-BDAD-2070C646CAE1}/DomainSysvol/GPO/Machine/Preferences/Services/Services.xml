@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NTServices clsid="{2CFB484A-4E96-4b5d-A0B6-093D2F91E6AE}"><NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="WinRM" image="2" changed="2021-12-20 12:19:09" uid="{A7340495-7C5E-4033-8730-4F88433BAB09}"><Properties startupType="AUTOMATIC" serviceName="WinRM" serviceAction="START" timeout="30"/></NTService>
+	<NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="AppIDSvc" image="0" changed="2022-04-22 12:44:59" uid="{EAC00410-F70B-45B8-B7A5-86FF1E293F0F}"><Properties startupType="NOCHANGE" serviceName="AppIDSvc" serviceAction="START" timeout="30" firstFailure="RESTART" secondFailure="RESTART" thirdFailure="RESTART" resetFailCountDelay="0" restartServiceDelay="60000"/></NTService>
+</NTServices>

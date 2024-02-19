@@ -1,0 +1,33 @@
+Enable-PSRemoting
+Enable-NetFirewallRule -DisplayName "Windows Management Instrumentation (DCOM-In)"
+Enable-NetFirewallRule -DisplayGroup "Remote Event Log Management"
+Enable-NetFirewallRule -DisplayGroup "Remote Service Management"
+Enable-NetFirewallRule -DisplayGroup "Remote Volume Management"
+Enable-NetFirewallRule -DisplayGroup "Windows Defender Firewall Remote Management"
+Enable-NetFirewallRule -DisplayGroup "Remote Scheduled Tasks Management"
+
+$FwRules = @('RemoteTask-In-TCP',
+        'RemoteTask-RPCSS-In-TCP',
+        'RemoteDesktop-UserMode-In-TCP',
+        'RemoteDesktop-UserMode-In-UDP',
+        'RemoteDesktop-Shadow-In-TCP',
+        'RemoteDesktop-In-TCP-WS',
+        'RemoteDesktop-In-TCP-WSS',
+        'RemoteEventLogSvc-In-TCP',
+        'RemoteEventLogSvc-NP-In-TCP',
+        'RemoteEventLogSvc-RPCSS-In-TCP',
+        'RemoteSvcAdmin-In-TCP',
+        'RemoteSvcAdmin-NP-In-TCP',
+        'RemoteSvcAdmin-RPCSS-In-TCP',
+        'RemoteFwAdmin-In-TCP',
+        'RemoteFwAdmin-RPCSS-In-TCP',
+        'RVM-VDS-In-TCP',
+        'RVM-VDSLDR-In-TCP',
+        'RVM-RPCSS-In-TCP',
+        'WINRM-HTTP-In-TCP',
+        'WINRM-HTTP-In-TCP-PUBLIC',
+        'WINRM-HTTP-Compat-In-TCP',
+        'WMI-RPCSS-In-TCP',
+        'WMI-WINMGMT-In-TCP')
+
+ForEach($Item in $FwRules) { Enable-NetFirewallRule -Name $Item -Verbose }
