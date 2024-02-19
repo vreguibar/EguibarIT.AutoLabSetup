@@ -69,6 +69,8 @@ $OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\
 #add some empty lines so the progress bar does not hide text
 [System.Environment]::NewLine
 [System.Environment]::NewLine
+[System.Environment]::NewLine
+[System.Environment]::NewLine
 
 Write-Verbose -Message 'Add Windows Features DNS'
 Add-WindowsFeature -Name DNS -IncludeAllSubFeature -Verbose:$False
