@@ -162,11 +162,11 @@ Copy-Item -Path $DMscripts\Pic\Default.jpg -Destination ('{0}\{1}\scripts' -f $S
 Copy-Item -Path $DMscripts\Set-AdPicture.ps1 -Destination ('{0}\{1}\scripts' -f $SysVol, $env:USERDNSDOMAIN)
 
 # Unblock Security from BGinfo.exe
-If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
+
   #Unblock-File -Path "${env:ProgramFiles(x86)}\BGInfo\BGinfo.exe"
 
   Unblock-File -Path ('{0}\{1}\scripts\Set-AdPicture.ps1' -f $SysVol, $env:USERDNSDOMAIN)
-}
+
 
 ###############################################################################
 # END Copy BGInfo and AdImagePhoto
@@ -202,7 +202,7 @@ Set-DnsServerPrimaryZone -Name $confXML.N.IP.IPv6ReverseZone -DynamicUpdate Secu
 
 
 # Configure Aging for the zones
-If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
+
   Set-DnsServerZoneAging $env:USERDNSDOMAIN -Aging $True
 
   Set-DnsServerZoneAging ('_msdcs.{0}' -f $env:USERDNSDOMAIN) -Aging $True
@@ -212,11 +212,7 @@ If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
   Set-DnsServerZoneAging $confXML.N.IP.IPv6ReverseZone -Aging $True
 
   set-DnsServerScavenging -ComputerName $Env:COMPUTERNAME -ApplyOnAllZones -ScavengingState $true -ScavengingInterval 7.00:00:00
-} Else {
-  dnscmd $Env:COMPUTERNAME /Config /DefaultAgingState 1 /DefaultNoRefreshInterval 168 /DefaultRefreshInterval 168
 
-  dnscmd $Env:COMPUTERNAME /Config /ScavengingInterval 168
-}
 
 
 # Set DNS Server Forwarders
@@ -348,8 +344,7 @@ $VMWareWMIFilter = @('Identify Virtual Machine',
                   # OLD => "Select * from Win32_ComputerSystem where Model='VMWare Virtual Platform'"
                   # NEW => "Select * from Win32_ComputerSystem WHERE (Model LIKE '%Virtual%')"
 
-If ([System.Environment]::OSVersion.Version.Build -ge 9200)
-{
+
   # Create new Domain Controllers GPO that applies to VM for TimeSync
   New-DelegateAdGpo -gpoDescription ('Set TIME parameters for Virtual Machine DC') -gpoScope C -gpoLinkPath ('OU=Domain Controllers,{0}' -f ([ADSI]'LDAP://RootDSE').rootDomainNamingContext.ToString())  -GpoAdmin ('{0}{1}{2}' -f $NC['sl'], $NC['Delim'], $confXML.n.Admin.LG.GpoAdminRight.Name)
 
@@ -358,7 +353,7 @@ If ([System.Environment]::OSVersion.Version.Build -ge 9200)
   Set-GPPrefRegistryValue -Name 'C-Set TIME parameters for Virtual Machine DC' -Context Computer -Action Update -Key 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSetservices\W32time\Config' -ValueName MaxNegPhaseCorrection -Value 3600 -Type DWord
   Set-GPPrefRegistryValue -Name 'C-Set TIME parameters for Virtual Machine DC' -Context Computer -Action Update -Key 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSetservices\W32time\Config' -ValueName MaxPosPhaseCorrection -Value 3600 -Type DWord
   Set-GPPrefRegistryValue -Name 'C-Set TIME parameters for Virtual Machine DC' -Context Computer -Action Update -Key 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSetservices\W32time\TimeProviders\NtpClient' -ValueName SpecialPollInterval -Value 900 -Type DWord
-}
+
 ###############################################################################
 # END Configure Default Policies
 ###############################################################################
@@ -370,7 +365,7 @@ If ([System.Environment]::OSVersion.Version.Build -ge 9200)
 # START configure Sites and Subnets
 ###############################################################################
 
-If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
+
     # Create 3 more sites apart from 'Default-First-Site-Name'
     New-ADReplicationSite -Name 'Second-Site' -Description 'Research & Development Facilities' -ProtectedFromAccidentalDeletion $true
     New-ADReplicationSite -Name 'Third-Site'  -Description 'Asian Business Precense'           -ProtectedFromAccidentalDeletion $true
@@ -395,7 +390,6 @@ If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
     Set-ADReplicationSiteLink -Identity 'DEFAULTIPSITELINK' -SitesIncluded @{Add="Third-Site"}
     Set-ADReplicationSiteLink -Identity 'DEFAULTIPSITELINK' -SitesIncluded @{Add="Fourth-Site"}
 
-}
 
 ###############################################################################
 # END configure Sites and Subnets
@@ -467,11 +461,8 @@ New-SmbShare -Name $confXML.N.Shares.AreasName -Path $path -FullAccess Everyone
 
 
 # Create the domain DFS
-If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
   New-DfsnRoot -TargetPath ('\\{0}\Shares' -f $env:COMPUTERNAME) -Type DomainV2 -Path ('\\{0}\Shares' -f $env:userdnsdomain)
-} Else {
-  dfsutil root addDom ('\\{0}\Shares' -f $env:COMPUTERNAME) V2
-}
+
 
 
 ###############################################################################

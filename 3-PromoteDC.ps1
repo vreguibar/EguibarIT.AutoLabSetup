@@ -263,78 +263,43 @@ If ($DcDisks) {
 # START Create unattended file
 ###############################################################################
 
-# Promote domain. Use PowerShell if Win2012 or higher. DcPromo if Win2008
-If (([System.Environment]::OSVersion.Version).Build -ge 9200) {
+# Promote domain.
 
-    Import-Module -Name ADDSDeployment -Force
+Import-Module -Name ADDSDeployment -Force
 
-    # configure new forest
-    $parameters = @{
-        DomainName                    = $confXML.N.PCs.DC1.DnsDomainName
-        DomainNetbiosName             = $confXML.N.PCs.DC1.NetBIOSDomainName
-        DomainMode                    = $confXML.N.DcPromo.DomainLevel
-        ForestMode                    = $confXML.N.DcPromo.ForestLevel
-        InstallDns                    = $true
-        NoDnsOnNetwork                = $true
-        NoRebootOnCompletion          = $true
-        SafeModeAdministratorPassword = (ConvertTo-SecureString -String $confXML.N.DefaultPassword -AsPlainText -Force)
-        Force                         = $true
-    }
-
-    if ($DcDisks -eq 'Multiple-Disks') {
-        $parameters.Add('DatabasePath', 'N:\NTDS')
-    } else {
-        $parameters.Add('DatabasePath', $confXML.N.DcPromo.NtdsPath)
-    }
-
-    if ($DcDisks -eq 'Multiple-Disks') {
-        $parameters.Add('SysvolPath', 'S:\SYSVOL')
-    } else {
-        $parameters.Add('SysvolPath', $confXML.N.DcPromo.SysvolPath)
-    }
-
-    if ($DcDisks -eq 'Multiple-Disks') {
-        $parameters.Add('LogPath', 'L:\NTDS-LOGs')
-    } else {
-        $parameters.Add('LogPath', $confXML.N.DcPromo.NtdsLogsPath)
-    }
-
-    Install-ADDSForest @parameters
-
-} else {
-
-    $file = '{0}{1}' -f $DMscripts, $confXML.N.DcPromo.Unattended
-
-    # Create GCInstall.ini file
-    New-Item -Path $DMscripts -Name $confXML.N.DcPromo.Unattended -type file
-
-
-    Add-Content -Value '[DCINSTALL]' -Path $file
-    Add-Content -Value 'ReplicaOrNewDomain=Domain' -Path $file
-    Add-Content -Value 'NewDomain=Forest' -Path $file
-    Add-Content -Value ('DomainNetBiosName={0}' -f $confXML.N.PCs.DC1.NetBIOSDomainName) -Path $file
-    Add-Content -Value ('NewDomainDNSName={0}' -f $confXML.N.PCs.DC1.DnsDomainName) -Path $file
-    Add-Content -Value 'InstallDNS=yes' -Path $file
-    Add-Content -Value 'RebootOnCompletion=No' -Path $file
-    Add-Content -Value ('SafeModeAdminPassword={0}' -f $confXML.N.DefaultPassword) -Path $file
-    Add-Content -Value ('ForestLevel={0}' -f $confXML.N.DcPromo.ForestLevel) -Path $file
-    Add-Content -Value ('DomainLevel={0}' -f $confXML.N.DcPromo.DomainLevel) -Path $file
-    Add-Content -Value ('DatabasePath={0}' -f $confXML.N.DcPromo.NtdsPath) -Path $file
-    Add-Content -Value ('LogPath={0}' -f $confXML.N.DcPromo.NtdsLogsPath) -Path $file
-    Add-Content -Value ('SYSVOLPath={0}' -f $confXML.N.DcPromo.SysvolPath) -Path $file
-    Add-Content -Value 'ConfirmGC=Yes' -Path $file
-    Add-Content -Value 'DNSOnNetwork=No' -Path $file
-    ###############################################################################
-    # END Create unattended file
-    ###############################################################################
-
-
-    # Change to the script folder where the unattended file is located
-    Set-Location -Path $DMscripts
-    # Execute DCPromo
-    C:\Windows\System32\DCPromo.exe /unattend:$file
-
+# configure new forest
+$parameters = @{
+    DomainName                    = $confXML.N.PCs.DC1.DnsDomainName
+    DomainNetbiosName             = $confXML.N.PCs.DC1.NetBIOSDomainName
+    DomainMode                    = $confXML.N.DcPromo.DomainLevel
+    ForestMode                    = $confXML.N.DcPromo.ForestLevel
+    InstallDns                    = $true
+    NoDnsOnNetwork                = $true
+    NoRebootOnCompletion          = $true
+    SafeModeAdministratorPassword = (ConvertTo-SecureString -String $confXML.N.DefaultPassword -AsPlainText -Force)
+    Force                         = $true
 }
+
+if ($DcDisks -eq 'Multiple-Disks') {
+    $parameters.Add('DatabasePath', 'N:\NTDS')
+} else {
+    $parameters.Add('DatabasePath', $confXML.N.DcPromo.NtdsPath)
+}
+
+if ($DcDisks -eq 'Multiple-Disks') {
+    $parameters.Add('SysvolPath', 'S:\SYSVOL')
+} else {
+    $parameters.Add('SysvolPath', $confXML.N.DcPromo.SysvolPath)
+}
+
+if ($DcDisks -eq 'Multiple-Disks') {
+    $parameters.Add('LogPath', 'L:\NTDS-LOGs')
+} else {
+    $parameters.Add('LogPath', $confXML.N.DcPromo.NtdsLogsPath)
+}
+
+Install-ADDSForest @parameters
+
 
 
 

@@ -133,7 +133,7 @@ if (-not(Test-Path -Path $regkeypath\Psched)) {
 
 Write-Verbose -Message 'Configure IPv6'
 
-If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
+
     # https://www.speedguide.net/articles/windows-8-10-2012-server-tcpip-tweaks-5077
     # https://docs.microsoft.com/en-us/windows-server/networking/technologies/network-subsystem/net-sub-performance-tuning-nics#bkmk_tcp
 
@@ -261,26 +261,7 @@ Example:
 
     # Disable SMB v1
     Set-SmbServerConfiguration -EnableSMB1Protocol $false -Confirm:$false
-} else {
 
-    # RECEIVE WINDOW AUTO-TUNING LEVEL
-    & "$env:windir\system32\netsh.exe" int tcp set global autotuninglevel=normal
-
-    # DISABLE WINDOWS SCALING HEURISTICS
-    & "$env:windir\system32\netsh.exe" int tcp set heuristics disabled
-
-    # TCP CHIMNEY OFFLOAD
-    & "$env:windir\system32\netsh.exe" int tcp set global chimney=enabled
-
-    # DIRECT CACHE ACCESS (DCA)
-    & "$env:windir\system32\netsh.exe" int tcp set global dca=enabled
-
-    # RECEIVE-SIDE SCALING STATE (RSS)
-    & "$env:windir\system32\netsh.exe" int tcp set global rss=enabled
-
-    # TCP 1323 TIMESTAMPS
-    & "$env:windir\system32\netsh.exe" int tcp set global timestamps=disabled
-}
 
 # Windows 2012 configuration - FINISH
 #-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-

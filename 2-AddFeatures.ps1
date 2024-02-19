@@ -171,7 +171,7 @@ If ($OsInstalationType -ne 'Server Core') {
 ############################################################
 
 # Load DnsServer module - ONLY 2012 and higher
-If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
+
     Import-Module -Name DnsServer -Verbose:$false
 
     Write-Verbose -Message 'Add DNS reverse lookup zones'
@@ -182,11 +182,7 @@ If ([System.Environment]::OSVersion.Version.Build -ge 9200) {
     # ToDo function to find IPv6 network address
     #Add-DnsServerPrimaryZone -NetworkId ('{0}/{1}' -f $confXML.N.PCs.DC1.IPv6, $confXML.N.PCs.DC1.PrefixLengthIPv6) -ZoneFile 'IPv6.dns'
     Add-DnsServerPrimaryZone -NetworkId 'fd36:46d4:a1a7:9d18::0/64' -ZoneFile 'IPv6.dns'
-} else {
-    Write-Verbose -Message 'Add DNS reverse lookup zones'
-    $dnsserver = ([wmiclass]'\\.\ROOT\Microsoftdns:Microsoftdns_zone').CreateZone(('{0}/{1}' -f $confXML.N.PCs.DC1.IPv4, $confXML.N.PCs.DC1.PrefixLengthIPv4), 0, $false)
-    $dnsserver = ([wmiclass]'\\.\ROOT\Microsoftdns:Microsoftdns_zone').CreateZone(('{0}/{1}' -f $confXML.N.PCs.DC1.IPv6, $confXML.N.PCs.DC1.PrefixLengthIPv6), 0, $false)
-}
+
 
 ############################################################
 ## END Add DNS Zones

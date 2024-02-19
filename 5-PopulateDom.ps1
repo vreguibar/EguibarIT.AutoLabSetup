@@ -279,13 +279,11 @@ $SvcAccList, $TmpOuDN, $TierGroup, $parameters = $null
 $SvcAccPath = 'OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItServiceAccountsOU.name, $confXML.n.Admin.OUs.ItAdminOU.name, ([ADSI]'LDAP://RootDSE').rootDomainNamingContext.ToString()
 
 
-If ($Global:OsBuild -ge 9200) {
     # Create the KDS Root Key (only once per domain).  This is used by the KDS service on DCs (along with other information) to generate passwords
     # http://blogs.technet.com/b/askpfeplat/archive/2012/12/17/windows-server-2012-group-managed-service-accounts.aspx
     # If working in a test environment with a minimal number of DCs and the ability to guarantee immediate replication, please use:
     #    Add-KdsRootKey –EffectiveTime ((get-date).addhours(-10))
     Add-KdsRootKey -EffectiveTime ((Get-Date).addhours(-10))
-}
 
 #Import ServiceAccounts CSV
 $SvcAccList = Import-Csv -Delimiter ';' -Path (Join-Path -Path $DMscripts -ChildPath $confXML.n.svcaccCSVfile -Resolve)
@@ -320,7 +318,7 @@ ForEach ($item In $SvcAccList) {
     }
 
 
-    If ($Global:OsBuild -ge 9200) {
+ 
 
         $params = @{
             Name                   = $item.name
@@ -357,9 +355,7 @@ ForEach ($item In $SvcAccList) {
         } catch {
             throw
         }
-    } else {
-        New-ADServiceAccount -Name $item.name -Description $item.Description -Path $TmpOuDN -Enabled $True -DNSHostName ('{0}.{1}' -f $item.name, $env:USERDNSDOMAIN)
-    }
+
 
 
 
