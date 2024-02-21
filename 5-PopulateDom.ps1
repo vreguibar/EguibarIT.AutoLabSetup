@@ -792,9 +792,9 @@ Set-ADUser -Identity $confXML.n.admin.Users.Admin.Name -PasswordNeverExpires $Tr
 Set-ADUser -Identity $confXML.n.admin.Users.NEWAdmin.Name -PasswordNeverExpires $True
 
 # Pre-Stage PAWs
-New-ADComputer -Name PAW0 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
-New-ADComputer -Name PAW1 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
-New-ADComputer -Name PAW2 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name Paw01 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name Paw11 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name Paw21 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 ###############################################################################
 # END Define OU Administrator and backup admin
 ###############################################################################
