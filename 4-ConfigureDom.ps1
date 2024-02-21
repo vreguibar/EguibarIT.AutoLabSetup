@@ -620,7 +620,7 @@ Set-ItemProperty -Path $regkeyPath -Name 'ForceAutoLogon' -Value 1
 
   $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
-  $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+  $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
   $Splat = @{
       Action      = $TaskAction

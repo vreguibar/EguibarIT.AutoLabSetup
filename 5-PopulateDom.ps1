@@ -253,7 +253,8 @@ ForEach ($item In $UserList) {
     # Read the path and file name
     $PhotoFile = '{0}\Pic\{1}.jpg' -f $DMScripts, $item.SamAccountName
     # Get the content of the JPG file
-    $photo = [byte[]](Get-Content -Path $PhotoFile -AsByteStream -Raw)
+    #$photo = [byte[]](Get-Content -Path $PhotoFile -AsByteStream -Raw)
+    [byte[]]$photo = [System.IO.File]::ReadAllBytes($PhotoFile)
     # Set the Photo to the AD user
     Set-ADUser -Identity $item.SamAccountName -Replace @{thumbnailPhoto = $photo }
 
@@ -279,11 +280,11 @@ $SvcAccList, $TmpOuDN, $TierGroup, $parameters = $null
 $SvcAccPath = 'OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItServiceAccountsOU.name, $confXML.n.Admin.OUs.ItAdminOU.name, ([ADSI]'LDAP://RootDSE').rootDomainNamingContext.ToString()
 
 
-    # Create the KDS Root Key (only once per domain).  This is used by the KDS service on DCs (along with other information) to generate passwords
-    # http://blogs.technet.com/b/askpfeplat/archive/2012/12/17/windows-server-2012-group-managed-service-accounts.aspx
-    # If working in a test environment with a minimal number of DCs and the ability to guarantee immediate replication, please use:
-    #    Add-KdsRootKey –EffectiveTime ((get-date).addhours(-10))
-    Add-KdsRootKey -EffectiveTime ((Get-Date).addhours(-10))
+# Create the KDS Root Key (only once per domain).  This is used by the KDS service on DCs (along with other information) to generate passwords
+# http://blogs.technet.com/b/askpfeplat/archive/2012/12/17/windows-server-2012-group-managed-service-accounts.aspx
+# If working in a test environment with a minimal number of DCs and the ability to guarantee immediate replication, please use:
+#    Add-KdsRootKey –EffectiveTime ((get-date).addhours(-10))
+Add-KdsRootKey -EffectiveTime ((Get-Date).addhours(-10))
 
 #Import ServiceAccounts CSV
 $SvcAccList = Import-Csv -Delimiter ';' -Path (Join-Path -Path $DMscripts -ChildPath $confXML.n.svcaccCSVfile -Resolve)
@@ -318,43 +319,43 @@ ForEach ($item In $SvcAccList) {
     }
 
 
- 
 
-        $params = @{
-            Name                   = $item.name
-            SamAccountName         = $item.name
-            DNSHostName            = ('{0}.{1}' -f $item.name, $env:USERDNSDOMAIN)
-            AccountNotDelegated    = $true
-            Description            = $item.Description
-            DisplayName            = $item.DisplayName
-            KerberosEncryptionType = 'AES128,AES256'
-            Path                   = $TmpOuDN
-            enabled                = $True
-            TrustedForDelegation   = $false
-            ServicePrincipalName   = ('HOST/{0}.{1}' -f $item.name, $env:USERDNSDOMAIN)
-        }
 
-        $ReplaceParams = @{
-            Replace = @{
-                'c'                 = 'MX'
-                'co'                = 'Mexico'
-                'company'           = $confXML.n.RegisteredOrg
-                'department'        = 'IT'
-                'employeeID'        = 'T{0}' -f $item.Tier
-                'employeeType'      = 'ServiceAccount'
-                'info'              = $item.Description
-                'l'                 = 'Puebla'
-                'mail'              = 'CEO@eguibarIT.com'
-                'title'             = $item.DisplayName
-                'userPrincipalName' = '{0}@{1}' -f $item.Name, $env:USERDNSDOMAIN
-            }
-        }
+    $params = @{
+        Name                   = $item.name
+        SamAccountName         = $item.name
+        DNSHostName            = ('{0}.{1}' -f $item.name, $env:USERDNSDOMAIN)
+        AccountNotDelegated    = $true
+        Description            = $item.Description
+        DisplayName            = $item.DisplayName
+        KerberosEncryptionType = 'AES128,AES256'
+        Path                   = $TmpOuDN
+        enabled                = $True
+        TrustedForDelegation   = $false
+        ServicePrincipalName   = ('HOST/{0}.{1}' -f $item.name, $env:USERDNSDOMAIN)
+    }
 
-        try {
-            New-ADServiceAccount @params | Set-ADServiceAccount @ReplaceParams
-        } catch {
-            throw
+    $ReplaceParams = @{
+        Replace = @{
+            'c'                 = 'MX'
+            'co'                = 'Mexico'
+            'company'           = $confXML.n.RegisteredOrg
+            'department'        = 'IT'
+            'employeeID'        = 'T{0}' -f $item.Tier
+            'employeeType'      = 'ServiceAccount'
+            'info'              = $item.Description
+            'l'                 = 'Puebla'
+            'mail'              = 'CEO@eguibarIT.com'
+            'title'             = $item.DisplayName
+            'userPrincipalName' = '{0}@{1}' -f $item.Name, $env:USERDNSDOMAIN
         }
+    }
+
+    try {
+        New-ADServiceAccount @params | Set-ADServiceAccount @ReplaceParams
+    } catch {
+        throw
+    }
 
 
 

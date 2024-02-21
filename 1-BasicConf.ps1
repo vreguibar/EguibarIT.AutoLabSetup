@@ -134,23 +134,23 @@ if (-not(Test-Path -Path $regkeypath\Psched)) {
 Write-Verbose -Message 'Configure IPv6'
 
 
-    # https://www.speedguide.net/articles/windows-8-10-2012-server-tcpip-tweaks-5077
-    # https://docs.microsoft.com/en-us/windows-server/networking/technologies/network-subsystem/net-sub-performance-tuning-nics#bkmk_tcp
+# https://www.speedguide.net/articles/windows-8-10-2012-server-tcpip-tweaks-5077
+# https://docs.microsoft.com/en-us/windows-server/networking/technologies/network-subsystem/net-sub-performance-tuning-nics#bkmk_tcp
 
-    # RECEIVE WINDOW AUTO-TUNING LEVEL
-    Set-NetTCPSetting -SettingName InternetCustom -AutoTuningLevelLocal Normal
+# RECEIVE WINDOW AUTO-TUNING LEVEL
+Set-NetTCPSetting -SettingName InternetCustom -AutoTuningLevelLocal Normal
 
-    # DISABLE WINDOWS SCALING HEURISTICS
-    Set-NetTCPSetting -SettingName InternetCustom -ScalingHeuristics Disabled
+# DISABLE WINDOWS SCALING HEURISTICS
+Set-NetTCPSetting -SettingName InternetCustom -ScalingHeuristics Disabled
 
-    # ADD-ON CONGESTION CONTROL PROVIDER (CTCP)
-    Set-NetTCPSetting -SettingName InternetCustom -CongestionProvider CTCP
+# ADD-ON CONGESTION CONTROL PROVIDER (CTCP)
+Set-NetTCPSetting -SettingName InternetCustom -CongestionProvider CTCP
 
-    # TCP CHIMNEY OFFLOAD
-    Set-NetOffloadGlobalSetting -Chimney Disabled
+# TCP CHIMNEY OFFLOAD
+Set-NetOffloadGlobalSetting -Chimney Disabled
 
 
-    <#
+<#
     'chimney' is not a valid argument for this command.
 The syntax supplied for this command is not valid. Check help for the correct syntax.
 
@@ -226,41 +226,41 @@ Example:
        set global rss=enabled autotuninglevel=normal
     #>
 
-    # DIRECT CACHE ACCESS (DCA)
-    & "$env:windir\system32\netsh.exe" int tcp set global dca=enabled
+# DIRECT CACHE ACCESS (DCA)
+& "$env:windir\system32\netsh.exe" int tcp set global dca=enabled
 
-    # NetDMA State
-    & "$env:windir\system32\netsh.exe" int tcp set global netdma=enabled
+# NetDMA State
+& "$env:windir\system32\netsh.exe" int tcp set global netdma=enabled
 
-    # CHECKSUM OFFLOAD
-    Enable-NetAdapterChecksumOffload -Name *
+# CHECKSUM OFFLOAD
+Enable-NetAdapterChecksumOffload -Name *
 
-    # RECEIVE-SIDE SCALING STATE (RSS)
-    Enable-NetAdapterRss -Name *
+# RECEIVE-SIDE SCALING STATE (RSS)
+Enable-NetAdapterRss -Name *
 
-    # RECEIVE SEGMENT COALESCING STATE (RSC)
-    Enable-NetAdapterRsc -Name *
+# RECEIVE SEGMENT COALESCING STATE (RSC)
+Enable-NetAdapterRsc -Name *
 
-    # LARGE SEND OFFLOAD (LSO)
-    Disable-NetAdapterLso -Name *
+# LARGE SEND OFFLOAD (LSO)
+Disable-NetAdapterLso -Name *
 
-    # TCP 1323 TIMESTAMPS
-    Set-NetTCPSetting -SettingName InternetCustom -Timestamps Disabled
+# TCP 1323 TIMESTAMPS
+Set-NetTCPSetting -SettingName InternetCustom -Timestamps Disabled
 
-    # NON SACK RTT RESILIENCY
-    Set-NetTCPSetting -SettingName InternetCustom -NonSackRttResiliency disabled
+# NON SACK RTT RESILIENCY
+Set-NetTCPSetting -SettingName InternetCustom -NonSackRttResiliency disabled
 
-    # MAX SYN RETRANSMISSIONS
-    Set-NetTCPSetting -SettingName InternetCustom -MaxSynRetransmissions 2
+# MAX SYN RETRANSMISSIONS
+Set-NetTCPSetting -SettingName InternetCustom -MaxSynRetransmissions 2
 
-    # INITIALCONGESTIONWINDOW (ICW)
-    Set-NetTCPSetting -SettingName InternetCustom -InitialCongestionWindow 10
+# INITIALCONGESTIONWINDOW (ICW)
+Set-NetTCPSetting -SettingName InternetCustom -InitialCongestionWindow 10
 
-    #
-    Set-SmbClientConfiguration -RequireSecuritySignature $true -Confirm:$false
+#
+Set-SmbClientConfiguration -RequireSecuritySignature $true -Confirm:$false
 
-    # Disable SMB v1
-    Set-SmbServerConfiguration -EnableSMB1Protocol $false -Confirm:$false
+# Disable SMB v1
+Set-SmbServerConfiguration -EnableSMB1Protocol $false -Confirm:$false
 
 
 # Windows 2012 configuration - FINISH
@@ -842,7 +842,7 @@ $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
 $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
-$Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+$Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
 $Splat = @{
     Action      = $TaskAction

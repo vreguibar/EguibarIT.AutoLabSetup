@@ -214,11 +214,11 @@ Try {
 
         $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-        $TaskAction = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument $Arguments
+        $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
         $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
-        $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+        $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
         $Splat = @{
             Action      = $TaskAction

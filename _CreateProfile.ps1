@@ -186,7 +186,7 @@ $ScriptBlock = {
 
     $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn
 
-    $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+    $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
     $Splat = @{
         Action      = $TaskAction
@@ -229,7 +229,7 @@ $ScriptBlock = {
 
     $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
-    $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+    $Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
     $Splat = @{
         Action      = $TaskAction

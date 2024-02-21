@@ -391,7 +391,7 @@ $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -
 
 $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
-$Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+$Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
 
 if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {

@@ -172,16 +172,16 @@ If ($OsInstalationType -ne 'Server Core') {
 
 # Load DnsServer module - ONLY 2012 and higher
 
-    Import-Module -Name DnsServer -Verbose:$false
+Import-Module -Name DnsServer -Verbose:$false
 
-    Write-Verbose -Message 'Add DNS reverse lookup zones'
-    if (-not (([string]::IsNullOrEmpty($confXML.N.PCs.DC1.IPv4)) -or (([string]::IsNullOrEmpty($confXML.N.PCs.DC1.PrefixLengthIPv4))))) {
-        $NetworkAddress = ConvertTo-IPv4NetworkAddress -IPv4Address $confXML.N.PCs.DC1.IPv4 -PrefixLength $confXML.N.PCs.DC1.PrefixLengthIPv4
-        Add-DnsServerPrimaryZone -NetworkId ('{0}/{1}' -f ([String]$NetworkAddress).Substring(1), $confXML.N.PCs.DC1.PrefixLengthIPv4) -ZoneFile 'IPv4.dns'
-    }
-    # ToDo function to find IPv6 network address
-    #Add-DnsServerPrimaryZone -NetworkId ('{0}/{1}' -f $confXML.N.PCs.DC1.IPv6, $confXML.N.PCs.DC1.PrefixLengthIPv6) -ZoneFile 'IPv6.dns'
-    Add-DnsServerPrimaryZone -NetworkId 'fd36:46d4:a1a7:9d18::0/64' -ZoneFile 'IPv6.dns'
+Write-Verbose -Message 'Add DNS reverse lookup zones'
+if (-not (([string]::IsNullOrEmpty($confXML.N.PCs.DC1.IPv4)) -or (([string]::IsNullOrEmpty($confXML.N.PCs.DC1.PrefixLengthIPv4))))) {
+    $NetworkAddress = ConvertTo-IPv4NetworkAddress -IPv4Address $confXML.N.PCs.DC1.IPv4 -PrefixLength $confXML.N.PCs.DC1.PrefixLengthIPv4
+    Add-DnsServerPrimaryZone -NetworkId ('{0}/{1}' -f ([String]$NetworkAddress).Substring(1), $confXML.N.PCs.DC1.PrefixLengthIPv4) -ZoneFile 'IPv4.dns'
+}
+# ToDo function to find IPv6 network address
+#Add-DnsServerPrimaryZone -NetworkId ('{0}/{1}' -f $confXML.N.PCs.DC1.IPv6, $confXML.N.PCs.DC1.PrefixLengthIPv6) -ZoneFile 'IPv6.dns'
+Add-DnsServerPrimaryZone -NetworkId 'fd36:46d4:a1a7:9d18::0/64' -ZoneFile 'IPv6.dns'
 
 
 ############################################################
@@ -257,7 +257,7 @@ $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
 
 $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
-$Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd
+$Stset = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopOnIdleEnd -Compatibility Win8
 
 $Splat = @{
     Action      = $TaskAction
