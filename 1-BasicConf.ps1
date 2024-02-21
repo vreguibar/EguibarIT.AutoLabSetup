@@ -30,9 +30,6 @@ Start-Sleep -Seconds 5
 # Clear any previous error
 $error.clear()
 
-Write-Verbose -Message 'Import the Module: ServerManager'
-Import-Module -Name ServerManager -Verbose:$false
-
 # Get Folder where all Delegation Model scripts & files
 $DMscripts = ('{0}\PsScripts' -f $env:SystemDrive)
 
@@ -42,6 +39,11 @@ Start-Transcript -Path ('{0}\1-BasicConf-{1}.log' -f $DMscripts, (Get-Date -Form
 $VerbosePreference = 'Continue'
 #$InformationPreference = 'Continue'
 #$ErrorActionPreference = 'Continue'
+
+Write-Verbose -Message 'Import the Module: ServerManager'
+Import-Module -Name ServerManager -Verbose:$false
+
+
 
 # Read Config.xml file. The file should be located on the same directory as this script
 try {
