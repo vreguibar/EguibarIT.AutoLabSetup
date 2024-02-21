@@ -19,16 +19,17 @@ The main scripts are numbered from 1 to 5, each having a specific purpose. All r
 This is the first script to be executed. It contains the default user/password (Don't use it in PROD... just a test environment) and depending os VM location, it will either create a PowerShellDirect or PSSession to copy the files and configure the OS to start the overall process. This script is remotely accessing the host, and making remote configurations through the session.
 
 This script will:
-Use default (harcoded to the script) uswername and password
-Create the corresponding session (Remote PSSession or PowerShell Direct)
-Create a NEW local Administrator
-Configure display, networkprofile, location, execution policy, default shell, locales, trusted hosts.
-Set registry keys for automatic logon
-Create Scheduled Task so any user who logon will have CMD and SConfig among the default shell.
-Create Scheduled Task that will execute the next script.
-Copy all requiered files to the session.
-Check if more than 1 disk is configured (in our case DC's have 6 disks, so it will initialize, format and configure accordingly).
-
+<ul>
+<li>Use default (harcoded to the script) uswername and password</li>
+<li>Create the corresponding session (Remote PSSession or PowerShell Direct)</li>
+<li>Create a NEW local Administrator</li>
+<li>Configure display, networkprofile, location, execution policy, default shell, locales, trusted hosts.</li>
+<li>Set registry keys for automatic logon</li>
+<li>Create Scheduled Task so any user who logon will have CMD and SConfig among the default shell.</li>
+<li>Create Scheduled Task that will execute the next script.</li>
+<li>Copy all requiered files to the session.</li>
+<li>Check if more than 1 disk is configured (in our case DC's have 6 disks, so it will initialize, format and configure accordingly).</li>
+</ul>
 Reboot the VM.
 
 <h2>1-BasicConfig.ps1</h2>
