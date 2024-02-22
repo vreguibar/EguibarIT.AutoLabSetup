@@ -222,3 +222,6 @@ As mentioned above, there are pic for each user created. These scripts do upload
 
 <h2>Set-ADPicture.ps1</h2>
 This script is copied to the NETLOGON folder, and using a GPO Scheduled task, it will be triggered at every logon of any user. This file helps display the individual PIC of the user.
+
+<h2>Unattend.xml</h2>
+Windows Unattend file for automatic deployment and configuration of the OS.
