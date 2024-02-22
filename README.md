@@ -184,6 +184,9 @@ This folder contains pic in jpg format for each user defined on the Users CSV fi
 This folder contains the GPO templates used on the environment. When creating the OU's, if a backup key is present (GUID), it will look into this folder. If backup GPO exist, it will automatically import the settings.
 If any new GPO is exported, the content under the GUID folder can be placed here.
 
+<h3>MapGuidsToGpoNames.ps1</h3>
+Working with GUID as folder names is not easy. In order to identify those folders this script will translate the GUIDs to the name of each GPO.
+
 <h1>Configuration Files</h1>
 All configuration files used are XML. The main file is called Config.XML, but any other file with different data might be parsed to the scripts, meanwhile the node structure is respected and it contains the needed information.
 
