@@ -1,0 +1,141 @@
+[Unicode]
+Unicode=yes
+
+[System Access]
+ForceLogoffWhenHourExpire = 1
+LSAAnonymousNameLookup = 0
+
+
+[Version]
+signature="$CHICAGO$"
+Revision=1
+
+
+
+[Application Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+[Security Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+[System Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+[Privilege Rights]
+SeDenyBatchLogonRight = *S-1-5-32-548,*S-1-5-32-549,*S-1-5-32-550,*S-1-5-32-544,*S-1-5-32-551
+SeDenyServiceLogonRight = *S-1-5-32-548,*S-1-5-32-549,*S-1-5-32-550,*S-1-5-32-544,*S-1-5-32-551
+SeServiceLogonRight = *S-1-5-20
+SeInteractiveLogonRight = *S-1-5-32-544
+SeTrustedCredManAccessPrivilege =
+SeTcbPrivilege =
+SeCreateTokenPrivilege =
+SeCreatePermanentPrivilege =
+SeLockMemoryPrivilege =
+SeNetworkLogonRight = *S-1-5-9,*S-1-5-11,*S-1-5-32-544
+SeBackupPrivilege = *S-1-5-32-544
+SeCreatePagefilePrivilege = *S-1-5-32-544
+SeCreateGlobalPrivilege = *S-1-5-32-544,*S-1-5-19,*S-1-5-20,*S-1-5-6
+SeCreateSymbolicLinkPrivilege = *S-1-5-32-544
+SeDebugPrivilege =
+SeDenyNetworkLogonRight = *S-1-5-32-546
+SeDenyInteractiveLogonRight = *S-1-5-32-550,*S-1-5-32-546,*S-1-5-32-546,*S-1-5-32-551,*S-1-5-32-548
+SeDenyRemoteInteractiveLogonRight = *S-1-5-32-546
+SeEnableDelegationPrivilege = *S-1-5-32-544
+SeRemoteShutdownPrivilege = *S-1-5-32-544
+SeAuditPrivilege = *S-1-5-19,*S-1-5-20
+SeImpersonatePrivilege = *S-1-5-32-544,*S-1-5-19,*S-1-5-20,*S-1-5-6
+SeIncreaseBasePriorityPrivilege = *S-1-5-32-544
+SeLoadDriverPrivilege = *S-1-5-32-544
+SeSecurityPrivilege = *S-1-5-32-544
+SeSystemEnvironmentPrivilege = *S-1-5-32-544
+SeProfileSingleProcessPrivilege = *S-1-5-32-544
+SeManageVolumePrivilege = *S-1-5-32-544
+SeRestorePrivilege = *S-1-5-32-544
+SeTakeOwnershipPrivilege = *S-1-5-32-544
+SeRemoteInteractiveLogonRight = *S-1-5-32-544
+[Service General Setting]
+"NTDS",2,""
+"ADWS",2,""
+"AppIDSvc",2,""
+"BITS",2,""
+"VaultSvc",2,""
+"CryptSvc",2,""
+"DFSR",2,""
+"Dfs",2,""
+"DPS",2,""
+"Dnscache",2,""
+"DNS",2,""
+"EFS",2,""
+"gpsvc",2,""
+"Kdc",2,""
+"LSM",2,""
+"KdsSvc",2,""
+"Netlogon",2,""
+"PlugPlay",2,""
+"Spooler",4,""
+"RpcEptMapper",2,""
+"SamSs",2,""
+"LanmanServer",2,""
+"Schedule",2,""
+"Themes",4,""
+"WinDefend",2,""
+"EventLog",2,""
+"MpsSvc",2,""
+"Winmgmt",2,""
+"WinRM",2,""
+"W32Time",2,""
+"wuauserv",2,""
+"XblGameSave",4,""
+"XblAuthManager",4,""
+"RemoteAccess",4,""
+"BDESVC",2,""
+"Fax",4,""
+"SharedAccess",4,""
+"SEMgrSvc",4,""
+"PhoneSvc",4,""
+"PrintNotify",4,""
+"TapiSrv",4,""
+"WMPNetworkSvc",4,""
+"icssvc",4,""
+"XboxGipSvc",4,""
+"XboxNetApiSvc",4,""
+[Registry Values]
+MACHINE\System\CurrentControlSet\Services\NTDS\Parameters\LDAPServerIntegrity=4,2
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SignSecureChannel=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SealSecureChannel=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RequireStrongKey=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RequireSignOrSeal=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RefusePasswordChange=4,0
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\MaximumPasswordAge=4,30
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange=4,0
+MACHINE\System\CurrentControlSet\Services\LDAP\LDAPClientIntegrity=4,2
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\RequireSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnableSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnablePlainTextPassword=4,0
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\RestrictNullSessAccess=4,1
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\RequireSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\EnableSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\AutoDisconnect=4,15
+MACHINE\System\CurrentControlSet\Control\Session Manager\ProtectionMode=4,1
+MACHINE\System\CurrentControlSet\Control\Session Manager\Kernel\ObCaseInsensitive=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\UseMachineId=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictAnonymousSAM=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictAnonymous=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\NoLMHash=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinServerSec=4,537395200
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinClientSec=4,537395200
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\allownullsessionfallback=4,0
+MACHINE\System\CurrentControlSet\Control\Lsa\LmCompatibilityLevel=4,5
+MACHINE\System\CurrentControlSet\Control\Lsa\LimitBlankPasswordUse=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\EveryoneIncludesAnonymous=4,0
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\InactivityTimeoutSecs=4,900
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle=4,0
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser=4,0
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin=4,2
+MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ScRemoveOption=1,"1"
