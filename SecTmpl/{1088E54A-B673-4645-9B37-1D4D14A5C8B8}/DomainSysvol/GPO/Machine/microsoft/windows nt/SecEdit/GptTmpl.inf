@@ -11,3 +11,4 @@ Unicode=yes
 SeDenyBatchLogonRight = *S-1-5-32-551,*S-1-5-32-550,*S-1-5-32-549,*S-1-5-32-548
 SeDenyServiceLogonRight = *S-1-5-32-551,*S-1-5-32-550,*S-1-5-32-549,*S-1-5-32-548
 SeServiceLogonRight = *S-1-5-80-0,*S-1-5-20
+
