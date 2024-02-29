@@ -13,7 +13,7 @@
 Automated scripts to provision and setup an AD environment (Including Delegation Model &amp; Tier Model)
 
 More info at:
- <a href="https://eguibarit.eu/automate-lab-environment-setup/"><b>EguibarIT Automated Lab Setup</b></a>
+ <a href="https://eguibarit.eu/automate-lab-environment-setup/"><b>EguibarIT Automated Lab Setup</b></a> Including more description and videos.
 
 <h1>Files and Folders</h1>
 The main scripts are numbered from 1 to 5, each having a specific purpose. All requiered files are copied by the file _CreateProfile.ps1 and then being "called" on each stage.
