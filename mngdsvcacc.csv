@@ -11,4 +11,3 @@ Service Account for 21B medical wonders, programmed to diagnose and treat injuri
 Service Account for B1 series Battle Droid;MSA_BattleDrd;Battle Droid;;2
 Service Account for EKA Droid;MSA_DrdEKA;Droid EKA;;2
 Service Account for SuperBattle Droid;MSA_SupBattDrd;SupBatt Droid;;2
-Group Managed Service Account used by Domain Controllers to securely run scheduled tasks.;gMSA_AdTskSchd;AD Task Scheduler Group Managed Service Account;;0

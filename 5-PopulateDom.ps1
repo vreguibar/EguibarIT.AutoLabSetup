@@ -132,6 +132,9 @@ $NC = @{'sl' = $confXML.n.NC.LocalDomainGroupPreffix;
 ###############################################################################
 $OUsToCreate, $existingOU, $i, $parameters = $null
 
+[System.Environment]::NewLine
+Write-Verbose -Message 'Start creating SITEs OU'
+[System.Environment]::NewLine
 
 # Get the Unique records of the OU field on the users CSV file
 $OUsToCreate = Import-Csv -Delimiter ';' -Path (Join-Path -Path $DMscripts -ChildPath $confXML.n.userCSVfile -Resolve) | Select-Object -Property OU | Sort-Object -Property OU -Unique
@@ -156,6 +159,9 @@ ForEach ($Ou in $OUsToCreate) {
     $error.clear()
 
     if (-not($existingOU)) {
+
+        Write-Verbose -Message ('Creating {0} OU' -f $Ou.ou)
+
         # Create site OU
         $Splat = @{
             ouName        = $Ou.ou
@@ -182,6 +188,10 @@ ForEach ($Ou in $OUsToCreate) {
 # START Populating AD Users from CSV
 ###############################################################################
 $UserList, $i, $parameters = $null
+
+[System.Environment]::NewLine
+Write-Verbose -Message 'Start creating Users in their corresponding OU'
+[System.Environment]::NewLine
 
 #Import users CSV
 $UserList = Import-Csv -Delimiter ';' -Path (Join-Path -Path $DMscripts -ChildPath $confXML.n.userCSVfile -Resolve)
@@ -276,6 +286,10 @@ ForEach ($item In $UserList) {
 # START creating Managed Service Accounts from CSV
 ###############################################################################
 $SvcAccList, $TmpOuDN, $TierGroup, $parameters = $null
+
+[System.Environment]::NewLine
+Write-Verbose -Message 'Start creating gMSAs on its corresponding Tier'
+[System.Environment]::NewLine
 
 $SvcAccPath = 'OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItServiceAccountsOU.name, $confXML.n.Admin.OUs.ItAdminOU.name, ([ADSI]'LDAP://RootDSE').rootDomainNamingContext.ToString()
 
@@ -385,6 +399,10 @@ ForEach ($item In $SvcAccList) {
 # START Creating AD Groups/Membership from CSV
 ###############################################################################
 $GroupList, $i, $parameters = $null
+
+[System.Environment]::NewLine
+Write-Verbose -Message 'Start creating Groups and GroupMembership in their corresponding OU'
+[System.Environment]::NewLine
 
 #Import Groups CSV
 $GroupList = Import-Csv -Delimiter ';' -Path (Join-Path -Path $DMscripts -ChildPath $confXML.n.groupCSVfile -Resolve)
@@ -618,6 +636,10 @@ ForEach ($item In $GroupList) {
 ###############################################################################
 $ShareList, $i, $parameters = $null
 
+[System.Environment]::NewLine
+Write-Verbose -Message 'Start creating Shares and LocalGroups in their corresponding OU'
+[System.Environment]::NewLine
+
 #Import shares CSV
 $ShareList = Import-Csv -Delimiter ';' -Path (Join-Path -Path $DMscripts -ChildPath $confXML.n.shareCSVfile -Resolve)
 
@@ -714,6 +736,10 @@ ForEach ($item In $ShareList) {
 # START Define OU Administrator
 ###############################################################################
 
+[System.Environment]::NewLine
+Write-Verbose -Message 'Start creating Semi-Privileged users.'
+[System.Environment]::NewLine
+
 [string]$AdDn = ([ADSI]'LDAP://RootDSE').rootDomainNamingContext
 
 # IT Admin OU Distinguished Name
@@ -724,40 +750,50 @@ $ItUsersAdminOuDn = 'OU={0},{1}' -f $confXML.n.Admin.OUs.ItAdminAccountsOU.name,
 
 
 # BAAD
+Write-Verbose -Message 'Start creating BAAD Semi-Privileged users.'
 New-SemiPrivilegedUser -SamAccountName damaul -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 New-SemiPrivilegedUser -SamAccountName dasidi -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 New-SemiPrivilegedUser -SamAccountName davade -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 #GOOD
+Write-Verbose -Message 'Start creating GOOD Semi-Privileged users.'
 New-SemiPrivilegedUser -SamAccountName luskyw -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 New-SemiPrivilegedUser -SamAccountName obiwan -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 New-SemiPrivilegedUser -SamAccountName yoda -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 #UGLY
+Write-Verbose -Message 'Start creating UGLY Semi-Privileged users.'
 New-SemiPrivilegedUser -SamAccountName bofett -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 New-SemiPrivilegedUser -SamAccountName jabink -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 New-SemiPrivilegedUser -SamAccountName chwook -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -Verbose
 
 # Add to SG_Tier0Admins
+Write-Verbose -Message 'Start granting Tier0 roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.admin.gg.tier0admins.name) -Members chwook_T0, davade_T0, yoda_T0
 # Add to SG_Tier1Admins
+Write-Verbose -Message 'Start granting Tier1 roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.admin.gg.tier1admins.name) -Members dasidi_T1, jabink_T1, obiwan_T1
 # Add to SG_Tier2Admins
+Write-Verbose -Message 'Start granting Tier2 roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.admin.gg.tier2admins.name) -Members damaul_T2, luskyw_T2, bofett_T2
 
 # Add to Site Admins
+Write-Verbose -Message 'Start granting Site Management roles roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{2}{1}{2}BAAD' -f $NC['sg'], $confXML.n.Sites.GG.SiteAdmins.Name, $NC['Delim']) -Members damaul_T2
 Add-ADGroupMember -Identity ('{0}{2}{1}{2}GOOD' -f $NC['sg'], $confXML.n.Sites.GG.SiteAdmins.Name, $NC['Delim']) -Members luskyw_T2
 Add-ADGroupMember -Identity ('{0}{2}{1}{2}UGLY' -f $NC['sg'], $confXML.n.Sites.GG.SiteAdmins.Name, $NC['Delim']) -Members bofett_T2
 
 # Add to Server Admins
+Write-Verbose -Message 'Start granting Server Management roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Servers.GG.ServerAdmins.Name) -Members dasidi_T1
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Servers.GG.ServerAdmins.Name) -Members jabink_T1
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Servers.GG.ServerAdmins.Name) -Members obiwan_T1
 
-# Add to Server Admins
+# Add to AD Admins
+Write-Verbose -Message 'Start granting Active Directory roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.AdminXtra.GG.DfsAdmins.Name) -Members chwook_T0
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.AdAdmins.Name) -Members davade_T0
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.InfraAdmins.Name) -Members yoda_T0
 
+Write-Verbose -Message 'Set "standard" password to key users.'
 Set-ADAccountPassword -Identity damaul_T2 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
 Set-ADAccountPassword -Identity luskyw_T2 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
 Set-ADAccountPassword -Identity bofett_T2 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
@@ -768,6 +804,7 @@ Set-ADAccountPassword -Identity davade_T0 -NewPassword (ConvertTo-SecureString -
 Set-ADAccountPassword -Identity yoda_T0 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
 Set-ADAccountPassword -Identity chwook_T0 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
 
+Write-Verbose -Message 'Avoid password expire to key users.'
 Set-ADUser -Identity damaul_T2 -PasswordNeverExpires $True
 Set-ADUser -Identity dasidi_T1 -PasswordNeverExpires $True
 Set-ADUser -Identity davade_T0 -PasswordNeverExpires $True
@@ -792,6 +829,7 @@ Set-ADUser -Identity $confXML.n.admin.Users.Admin.Name -PasswordNeverExpires $Tr
 Set-ADUser -Identity $confXML.n.admin.Users.NEWAdmin.Name -PasswordNeverExpires $True
 
 # Pre-Stage PAWs
+Write-Verbose -Message 'Pre-Stage one PAW for Tier0, Tier1 and Tier2'
 New-ADComputer -Name Paw01 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 New-ADComputer -Name Paw11 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 New-ADComputer -Name Paw21 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
@@ -809,6 +847,8 @@ New-ADComputer -Name Paw21 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.It
 # START Scheduled Tasks
 ###############################################################################
 
+Write-Verbose -Message 'Grant gMSA_AdTskSchd roles to manage users and groups.'
+
 # Get the gMSA to run scheduled tasks on DCs
 $SvcAcc = Get-ADServiceAccount -Filter { name -like 'gMSA_AdTskSchd' }
 
@@ -823,6 +863,7 @@ Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sl'], $NC['Delim'], $confXML.n.
 Set-ADServiceAccount $SvcAcc -PrincipalsAllowedToRetrieveManagedPassword 'Domain Controllers'
 
 # The ServiceAccount cannot contain $ at the end.
+Write-Verbose -Message 'Set housekeeping for User/Group AdminCount.'
 Set-ScheduleAllUserAdminCount -ServiceAccount $SvcAcc.Name -Verbose
 Set-ScheduleAllGroupAdminCount -ServiceAccount $SvcAcc.Name -Verbose
 

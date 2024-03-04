@@ -726,6 +726,11 @@
                 <DisplayName>Transfer FSMO roles</DisplayName>
                 <Description>Delegated Rights to transfer FSMO roles</Description>
             </TransferFSMOright>
+            <DcManagement>
+                <Name>DcManagement</Name>
+                <DisplayName>DC Management</DisplayName>
+                <Description>Delegated rights to administer the Domain Controller (Install Software, Create files/Folders, etc.)</Description>
+            </DcManagement>
              <GlobalGroupRight>
                 <Name>GlobalGroupRight</Name>
                 <DisplayName>Global Group Management Right</DisplayName>
