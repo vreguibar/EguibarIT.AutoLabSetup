@@ -10,7 +10,8 @@
 
 # EguibarIT.AutoLabSetup
 
-Automated scripts to provision and setup an AD environment (Including Delegation Model &amp; Tier Model)
+Automated scripts to provision and setup an AD environment (Including Delegation Model &amp; Tier Model).
+For more information and videos, please visit <a href="https://eguibarit.eu/automate-lab-environment-setup/">Setting up a LAB environment</a>
 
 ## Files and Folders
 
