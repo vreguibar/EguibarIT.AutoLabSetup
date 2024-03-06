@@ -1,0 +1,875 @@
+[CmdletBinding()]
+Param(
+
+    # Param1 VM new name
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+        Position = 0)]
+    [ValidateNotNullOrEmpty()]
+    [ValidateLength(0, 20)]
+    [string]
+    $vmName,
+
+    # Param2 integer representing the OS type of the VM
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+        Position = 1)]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('Win10', 'Win11', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE')]
+    [string]
+    $vmOsType,
+
+    # Param3 Data File
+    [Parameter(Mandatory = $false, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+        Position = 2)]
+    [string]
+    $DataFile
+
+)
+<#
+.Synopsis
+   Create a MOD virtual machine
+.DESCRIPTION
+   Create a MOD (modified) virtual machine by providing only 2 parameters.
+   This script is harcoded to use my laptop virtual environment.
+   All VMs go into C:\VMs
+   Any created VM has a differential disk based on existing master disks
+   Win 10, Win 11, Win 2019, Win 2019 Core, Win 2022, Win 2022 Core
+   The Windows Hostname will be the same as the VM name provided.
+.EXAMPLE
+   To create Win 8.1 called VMWIN8
+   New-LabVm -vmName VMWIN8 -vmOsType 'Win8.1'
+.EXAMPLE
+   To create Win 8.1 called Srv2012
+   New-LabVm Srv2012 'W2k12R2'
+.INPUTS
+   Param1 vmName:......String. Name of the new Virtual Machine
+   Param2 vmOsType:....Type of OS. 'Win10', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE'
+.NOTES
+    Version:         1.6
+    DateModified:    28/Jun/2022
+    LasModifiedBy:   Vicente Rodriguez Eguibar
+                     vicente@eguibarIT.com
+                     Eguibar Information Technology S.L.
+                     http://www.eguibarit.com
+#>
+
+Set-StrictMode -Version Latest
+
+#Check if script is running as ADMINISTRATOR
+[bool]$IsAdmin = (([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')
+
+If (-not $IsAdmin) {
+    Write-Error -Message 'This script must be executed as ADMINISTRATOR!!!'
+    Exit
+}
+
+################################################################################
+# Constants
+$VmFolder = 'C:\VMs'
+
+If (-not $PSBoundParameters['DataFile']) {
+
+    Write-Verbose -Message 'Getting default location of Data file.'
+
+    $DataFile = 'C:\VMs\MainData.psd1'
+} else {
+    Write-Verbose -Message ('Using {0} Data file.' -f $PSBoundParameters['DataFile'])
+}
+
+################################################################################
+# Variables
+#[System.String]$VmSwitchName  = 'vSwitch'
+[System.String]$VmSwitchName = 'LAN'
+[System.Int32]$ProcessorCount = 2
+
+$VM = $null
+$Splat = $null
+$CurrentHost = $null
+$DefaultGatewayIpV4 = $null
+$DefaultGatewayIpV6 = $null
+$DNS1IpV4 = $null
+$DNS2IpV4 = $null
+$DNS3IpV4 = $null
+$DNS4IpV4 = $null
+$DNS5IpV4 = $null
+$DNS1IpV6 = $null
+$DNS2IpV6 = $null
+$DNS3IpV6 = $null
+$DNS4IpV6 = $null
+$DNS5IpV6 = $null
+$IPv4 = $null
+$IPv6 = $null
+$DnsDomainName = $null
+
+[System.Int64]$MemoryStartupBytes = 1024MB
+[System.Int64]$MemoryMinimum = 512MB
+[System.Int64]$MemoryMaximum = 4096MB
+
+
+
+################################################################################
+# Checks
+
+# Check if the VMs folder exists (Default folder for my VMs
+If (Test-Path -Path $VmFolder) {
+    # Check if the new VM name already exist
+    if (-Not (Test-Path -Path $vmName)) {
+
+        Write-Verbose -Message ('VM folder {0} does not exist. Creating it.' -f $vmName)
+        # If the folder doesn't exist, then create it
+        New-Item -Path $VmFolder -Value $vmName -ItemType Directory -Force | Out-Null
+    }
+} Else {
+    # The VMs folder does not exist, then create it and the new VM folder
+    Write-Verbose -Message 'Default VMs folder does not exist. Creating it.'
+    New-Item -Path 'C:\' -Value 'VMs' -ItemType Folder -Force | Out-Null
+    New-Item -Path $VmFolder -Value $vmName -ItemType Folder -Force | Out-Null
+}
+
+
+# Set the new diff path name
+$vmVhdNewDisk = '{0}\{1}\{1}.vhdx' -f $VmFolder, $vmName
+
+#Check if VmSwitch exists, otherwise create it
+$VmSwitch = Get-VMSwitch -Name $VmSwitchName -ErrorAction SilentlyContinue
+If (-not $VmSwitch) {
+    Write-Verbose -Message 'Default vSwitch "LAN" does not exist. Creating it.'
+    $Splat = @{
+        Name              = $VmSwitchName
+        NetAdapterName    = 'Ethernet'
+        AllowManagementOS = $true
+        EnableIov         = $True
+        Notes             = 'vSwitch used for VM to communicate, using physical NIC for communication.'
+    }
+    $VmSwitch = New-VMSwitch @Splat | Set-NetConnectionProfile -NetworkCategory Private
+}
+
+
+
+################################################################################
+# Set the master disk based on choosen OS Type
+
+# Define the Root Folder where master disks reside
+$MastersRoot = 'C:\VMs\Masters'
+
+switch ($vmOsType) {
+    # Option 1 -> Windows 10
+    'Win10' {
+        # Master Disk Name _OK_Win10x64.vhdx
+
+        # Set the Master Disk path name
+        #$vmVhdParentDisk = 'C:\VMs\_OK_Win10x64-27-Dec-2019.vhdx'
+        $vmVhdParentDisk = '{0}\_OK_Win10x64-Jan-2021.vhdx' -f $MastersRoot
+
+    } #----- End of Option 1 -----
+
+    # Option 2 -> Windows Server 2019 DesktopExperience
+    'W2k19' {
+        # Master Disk Name _OK_W2k19-6-12-2018.vhdx
+
+        # Set the Master Disk path name
+        $vmVhdParentDisk = '{0}\_OK_W2019-GUI-Dec-2020.vhdx' -f $MastersRoot
+
+        #Define memory params
+        $MemoryStartupBytes = 2048MB
+        $MemoryMinimum = 512MB
+        $MemoryMaximum = 4096MB
+
+        #Define CPU counts
+        $ProcessorCount = 4
+
+    } #----- End of Option 2 -----
+
+    # Option 3 -> Windows Server 2019 CORE
+    'W2k19-CORE' {
+        # Master Disk Name _OK_W2019-Core-5-12-2018.vhdx
+
+        # Set the Master Disk path name
+        #$vmVhdParentDisk = '{0}\_OK_W2019-Core-25-Feb-2020.vhdx'
+        $vmVhdParentDisk = '{0}\_OK_W2019-Core-Dec-2020.vhdx' -f $MastersRoot
+
+        #Define memory params
+        $MemoryStartupBytes = 2048MB
+        $MemoryMinimum = 512MB
+        $MemoryMaximum = 4096MB
+
+        #Define CPU counts
+        $ProcessorCount = 4
+
+    } #----- End of Option 3 -----
+
+    # Option 4 -> Windows Server 2022 DesktopExperience
+    'W2022' {
+        # Master Disk Name _OK_W2022-GUI-Oct-2021.vhdx
+
+        # Set the Master Disk path name
+        $vmVhdParentDisk = '{0}\_OK_W2022-GUI-Dec-2023.vhdx' -f $MastersRoot
+
+        #Define memory params
+        $MemoryStartupBytes = 4096MB
+        $MemoryMinimum = 4096MB
+        $MemoryMaximum = 8192MB
+
+        #Define CPU counts
+        $ProcessorCount = 8
+
+    } #----- End of Option 4 -----
+
+    # Option 5 -> Windows Server 2022 CORE
+    'W2022-CORE' {
+        # Master Disk Name _OK_W2022-Core-June2022.vhdx
+
+        # Set the Master Disk path name
+        $vmVhdParentDisk = '{0}\_OK_W2022-Core-Feb2024.vhdx' -f $MastersRoot
+
+        #Define memory params
+        $MemoryStartupBytes = 4096MB
+        $MemoryMinimum = 4096MB
+        $MemoryMaximum = 8192MB
+
+        #Define CPU counts
+        $ProcessorCount = 8
+
+    } #----- End of Option 5 -----
+
+    # Option 6 -> Windows 11
+    'Win11' {
+        # Master Disk Name OK_Win11-Oct-2021.vhdx
+
+        # Set the Master Disk path name
+        $vmVhdParentDisk = '{0}\_OK_Win11-Dec2023.vhdx' -f $MastersRoot
+    } #----- End of Option 6 -----
+
+} # --- End of switch ---
+
+
+
+#Create the new Differential Disk, having the master
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Creating the new differential disk...'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+
+# Ensure disk does not exists.
+$DiskExists = Get-VHD -Path $vmVhdNewDisk -ErrorAction SilentlyContinue
+If ($DiskExists) {
+    Remove-Item $vmVhdNewDisk -Force | Out-Null
+}
+
+#Create the disk
+$splat = @{
+    Path         = $vmVhdNewDisk
+    ParentPath   = $vmVhdParentDisk
+    Differencing = $true
+}
+New-VHD @splat | Out-Null
+
+
+
+# Create the new VM
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Creating the ' $vmName ' virtual machine...'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+$splat = @{
+    Name         = $vmName
+    Generation   = 2
+    Path         = $VmFolder
+    VHDPath      = $vmVhdNewDisk
+    BootDevice   = 'VHD'
+    SwitchName   = $VmSwitch.Name
+    ComputerName = 'localhost'
+    #Version      = 11
+}
+$VM = New-VM @splat
+
+
+
+# Configure Integration Services
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Configuring Integration Services...'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+Get-VMIntegrationService -VMName $vmName | ForEach-Object { Enable-VMIntegrationService -Name $_.Name -VMName $vmName } | Out-Null
+
+
+
+# Configure Memory for the VM
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Configuring Memory...'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+$splat = @{
+    VM                   = $VM
+    DynamicMemoryEnabled = $true
+    MinimumBytes         = $MemoryMinimum
+    StartupBytes         = $MemoryStartupBytes
+    MaximumBytes         = $MemoryMaximum
+    Passthru             = $true
+}
+Set-VMMemory @splat | Out-Null
+
+
+
+# Configure CPU for the VM
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Configuring CPU...'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+$splat = @{
+    VMName   = $vmName
+    Count    = $ProcessorCount
+    Reserve  = 10
+    Maximum  = 75
+    Passthru = $true
+}
+Set-VMProcessor @splat | Out-Null
+
+
+
+# Configure Memory for the VM
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Configuring other parameters...'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+$splat = @{
+    AutomaticCheckpointsEnabled = $false
+    AutomaticStartAction        = 'StartIfRunning'
+    AutomaticStopAction         = 'ShutDown'
+    ComputerName                = 'localhost'
+    Name                        = $vmName
+    Note                        = '{0} - {1}' -f $vmName, $vmOsType
+    Passthru                    = $true
+}
+Set-VM @splat | Out-Null
+
+# Enable SecureBoot
+Set-VMFirmware -VMName $vmName -SecureBootTemplate 'MicrosoftWindows' -EnableSecureBoot On
+
+# Add virtual TPM
+$HGOwner = Get-HgsGuardian UntrustedGuardian
+$KeyProtector = New-HgsKeyProtector -Owner $HGOwner -AllowUntrustedRoot
+Set-VMKeyProtector -VMName $vmName -KeyProtector $KeyProtector.RawData
+Enable-VMTPM -VM $vmName
+
+
+#Mount the newly created VHDX file
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '    Mount and patch differential VHDX (inyect unattended.xml file)'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+
+# This is not working on Windwos11 October 2011 version
+#[System.String]$mount = (Mount-DiskImage -ImagePath $vmVhdNewDisk -StorageType VHDX -Access ReadWrite -PassThru | Get-Disk | Get-Partition | Get-Volume).DriveLetter
+
+# Define new folder for temporary mount VHDx image
+$TempMount = New-Item -Path $VmFolder -Name TempMount -ItemType Directory
+
+# Mount VHDx image without drive letter and get the disk
+$MountedVhd = Mount-DiskImage -ImagePath $vmVhdNewDisk -NoDriveLetter -PassThru | Get-Disk
+
+# Select ONLY Basic partitions
+$Partitions = $MountedVhd | Get-Partition | Where-Object { $_.Type -eq 'Basic' }
+
+# Provide access to the mounted path (C:\VMs\TmpMount\)
+$Partitions | Add-PartitionAccessPath -AccessPath $TempMount
+
+
+# Generate static MAC address
+<#
+the number of dynamic MAC addresses that a Hyper-V host can produce is 256. Suppose we have the MAC address aa-bb-cc-dd-ee-ff.
+
+The first 3 octets (aa-bb-cc) refer to a Microsoftâ€™s Unique Identifier that is used in all Hyper-V hosts (00: 15: 5D).
+The next 2 octets (dd-ee) are generated by the last two octets of the IP address that was first set up on the Hyper-V server.
+The last octet (ff) is generated from the range 0x0 â€“ 0xFF.
+#>
+
+# Microsoftâ€™s Unique Identifier that is used in all Hyper-V hosts (00: 15: 5D)
+$TmpMAC = '00-15-5D-'
+# next 3 octets
+$TmpMAC += [BitConverter]::ToString([BitConverter]::GetBytes((Get-Random -Maximum 0xFFFFFFFFFFFF)), 0, 3)
+
+Get-VM $vmName | Set-VMNetworkAdapter -StaticMacAddress ($TmpMAC.Replace('-', ''))
+
+# Get VM MAC address
+#$VmMacAddress = (Get-VM  $vmName | Get-VMNetworkAdapter).MacAddress -replace '..(?!$)', '$&:'
+
+
+# Get and prepare IP configuration
+If (Test-Path -Path $DataFile) {
+
+    try {
+        # Read the configuration file (PSD1)
+        $ht = Import-PowerShellDataFile $DataFile
+        Write-Verbose -Message ('Data File {0} loaded succesfully' -f $DataFile)
+    } catch {
+        throw
+    }
+
+    # Check if newly created VM exist on the configuration
+    if ($ht.AllNodes.ForEach({ $_.NodeName }).contains($VmName)) {
+
+        # Define Hashtable to hold the values from configuration file (PSD1)
+        $CurrentHost = @{
+            NodeName           = [System.String]
+            DefaultGatewayIpV4 = [System.String]
+            DefaultGatewayIpV6 = [System.String]
+            DNS1IpV4           = [System.String]
+            DNS2IpV4           = [System.String]
+            DNS3IpV4           = [System.String]
+            DNS4IpV4           = [System.String]
+            DNS5IpV4           = [System.String]
+            DNS1IpV6           = [System.String]
+            DNS2IpV6           = [System.String]
+            DNS3IpV6           = [System.String]
+            DNS4IpV6           = [System.String]
+            DNS5IpV6           = [System.String]
+            TimeZone           = [System.String]
+            IPv4               = [System.String]
+            MaskV4             = [System.String]
+            IPv6               = [System.String]
+            MaskV6             = [System.String]
+            NetBIOSDomainName  = [System.String]
+            DnsDomainName      = [System.String]
+            Description        = [System.String]
+            Disks              = [System.String]
+        }
+
+        # Iterate all nodes
+        Foreach ($item in $ht.AllNodes) {
+            # Get wildcard data (all nodes)
+            If ($item.NodeName -eq '*') {
+                [System.String]$DefaultGatewayIpV4 = $item.DefaultGatewayIpV4
+                [System.String]$DefaultGatewayIpV6 = $item.DefaultGatewayIpV6
+                [System.String]$DNS1IpV4 = $item.DNS1IpV4
+                [System.String]$DNS2IpV4 = $item.DNS2IpV4
+                [System.String]$DNS3IpV4 = $item.DNS3IpV4
+                [System.String]$DNS4IpV4 = $item.DNS4IpV4
+                [System.String]$DNS5IpV4 = $item.DNS5IpV4
+                [System.String]$DNS1IpV6 = $item.DNS1IpV6
+                [System.String]$DNS2IpV6 = $item.DNS2IpV6
+                [System.String]$DNS3IpV6 = $item.DNS3IpV6
+                [System.String]$DNS4IpV6 = $item.DNS4IpV6
+                [System.String]$DNS5IpV6 = $item.DNS5IpV6
+                $CurrentHost.TimeZone = $item.TimeZone
+            } # End If
+
+            # Get specific host data
+            If ($item.NodeName -eq $VmName) {
+                $IPv4 = $item.IPv4
+                $IPv6 = $item.IPv6
+                $CurrentHost.NetBIOSDomainName = $item.NetBIOSDomainName
+                $DnsDomainName = $item.DnsDomainName
+                $CurrentHost.Description = $item.Description
+                Try {
+                    $CurrentHost.Disks = $item.Disks
+                } Catch {
+                    $CurrentHost.Disks = 'SingleDisk'
+                }
+            } # End If
+        } # End Foreach
+    } # End If
+
+
+} # Get and prepare IP configuration
+
+Write-Verbose -Message ('Ipv4 address:         {0}' -f $IPv4)
+Write-Verbose -Message ('Ipv4 Default gateway: {0}' -f $DefaultGatewayIpV4)
+Write-Verbose -Message ('Ipv4 Primary DNS:     {0}' -f $DNS1IpV4 )
+Write-Verbose -Message ('Ipv4 Secondary DNS:   {0}' -f $DNS2IpV4)
+Write-Verbose -Message ('Ipv4 additional DNS:  {0}, {1} and {2}' -f $DNS3IpV4, $DNS4IpV4, $DNS5IpV4)
+
+Write-Verbose -Message ('Ipv6 address:         {0}' -f $IPv6)
+Write-Verbose -Message ('Ipv6 Default gateway: {0}' -f $DefaultGatewayIpV6)
+Write-Verbose -Message ('Ipv6 Primary DNS:     {0}' -f $DNS1IpV6 )
+Write-Verbose -Message ('Ipv6 Secondary DNS:   {0}' -f $DNS2IpV6)
+Write-Verbose -Message ('Ipv6 additional DNS:  {0}, {1} and {2}' -f $DNS3IpV6, $DNS4IpV6, $DNS5IpV6)
+
+# IP configuration section of the Unattend file
+if ($ipv4 -or $ipv6) {
+    $UnattendIpConfig = @"
+<component name="Microsoft-Windows-TCPIP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <Interfaces>
+                <Interface wcm:action="add">
+                    <Identifier>$TmpMAC</Identifier>
+                    <Ipv4Settings>
+                        <DhcpEnabled>false</DhcpEnabled>
+                        <Metric>10</Metric>
+                        <RouterDiscoveryEnabled>false</RouterDiscoveryEnabled>
+                    </Ipv4Settings>
+                    <Ipv6Settings>
+                        <DhcpEnabled>false</DhcpEnabled>
+                        <Metric>10</Metric>
+                        <RouterDiscoveryEnabled>false</RouterDiscoveryEnabled>
+                    </Ipv6Settings>
+                    <UnicastIpAddresses>
+                        <IpAddress wcm:action="add" wcm:keyValue="1">$IPv4</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="2">$IPv6</IpAddress>
+                    </UnicastIpAddresses>
+                    <Routes>
+                        <Route wcm:action="add">
+                            <Identifier>0</Identifier>
+                            <Metric>10</Metric>
+                            <NextHopAddress>$DefaultGatewayIpV4</NextHopAddress>
+                            <Prefix>0.0.0.0/0</Prefix>
+                        </Route>
+                        <Route wcm:action="add">
+                            <Identifier>1</Identifier>
+                            <Metric>10</Metric>
+                            <NextHopAddress>$DefaultGatewayIpV6</NextHopAddress>
+                            <Prefix>::0/0</Prefix>
+                        </Route>
+                    </Routes>
+                </Interface>
+            </Interfaces>
+        </component>
+        <component name="Microsoft-Windows-DNS-Client" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <Interfaces>
+                <Interface wcm:action="add">
+                    <Identifier>$TmpMAC</Identifier>
+                    <DNSServerSearchOrder>
+                        <IpAddress wcm:action="add" wcm:keyValue="1">$DNS1IpV4</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="2">$DNS2IpV4</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="3">$DNS3IpV4</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="4">$DNS4IpV4</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="5">$DNS5IpV4</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="6">$DNS1IpV6</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="7">$DNS2IpV6</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="8">$DNS3IpV6</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="9">$DNS4IpV6</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="10">$DNS5IpV6</IpAddress>
+                    </DNSServerSearchOrder>
+                    <DNSDomain>EguibarIT.local</DNSDomain>
+                    <DisableDynamicUpdate>false</DisableDynamicUpdate>
+                    <EnableAdapterDomainNameRegistration>true</EnableAdapterDomainNameRegistration>
+                </Interface>
+            </Interfaces>
+            <DNSSuffixSearchOrder>
+                <DomainName wcm:action="add" wcm:keyValue="1">EguibarIT.local</DomainName>
+            </DNSSuffixSearchOrder>
+        </component>
+"@
+} else {
+    $UnattendIpConfig = $null
+}
+
+
+# Get Domain DN
+[string]$AdDn = $DnsDomainName
+$AdDn = 'DC={0},DC={1}' -f $AdDn.split('.')[0], $AdDn.split('.')[1]
+
+# Tier0 OUs
+switch -wildcard ($VmName) {
+    # PAWs
+    'Paw0*' {
+        $DestOU = ('OU=PawT0,OU=PAW,OU=Admin,{0}' -f $AdDn)
+    }
+    'Paw1*' {
+        $DestOU = ('OU=PawT1,OU=PAW,OU=Admin,{0}' -f $AdDn)
+    }
+    'Paw2*' {
+        $DestOU = ('OU=PawT2,OU=PAW,OU=Admin,{0}' -f $AdDn)
+    }
+    # Tier0
+    {
+        ($_ -eq 'Adfs*') -or
+        ($_ -eq 'Ca*') -or
+        ($_ -eq 'Dsc*') -or
+        ('Linux1', 'Linux2' -contains $_) -or
+        ($_ -eq 'Mdt*') -or
+        ($_ -eq 'Sccm*') -or
+        ($_ -eq 'Scom*') -or
+        ('SQL1', 'SQL2' -contains $_) -or
+        ('Srv1', 'Srv2', 'Srv3', 'Srv4' -contains $_) -or
+        ($_ -eq 'Vmm*') -or
+        ($_ -eq 'Wac*') -or
+        ($_ -eq 'Wsus*')
+    } {
+        $DestOU = ('OU=InfraT0,OU=Infra,OU=Admin,{0}' -f $AdDn)
+    }
+
+    #Tier2
+    { 'PC1', 'PC4', 'PC7', 'PC10' -Contains $_ } {
+        $DestOU = ('OU=Desktops,OU=BAAD,OU=Sites,{0}' -f $AdDn)
+    }
+    { 'PC2', 'PC5', 'PC8', 'PC11' -Contains $_ } {
+        $DestOU = ('OU=Desktops,OU=GOOD,OU=Sites,{0}' -f $AdDn)
+    }
+    { 'PC3', 'PC6', 'PC9', 'PC12' -Contains $_ } {
+        $DestOU = ('OU=Desktops,OU=UGLY,OU=Sites,{0}' -f $AdDn)
+    }
+    { 'Lap1', 'Lap4', 'Lap7' -Contains $_ } {
+        $DestOU = ('OU=Laptops,OU=BAAD,OU=Sites,{0}' -f $AdDn)
+    }
+    { 'Lap2', 'Lap5', 'Lap8' -Contains $_ } {
+        $DestOU = ('OU=Laptops,OU=GOOD,OU=Sites,{0}' -f $AdDn)
+    }
+    { 'Lap3', 'Lap6', 'Lap9' -Contains $_ } {
+        $DestOU = ('OU=Laptops,OU=UGLY,OU=Sites,{0}' -f $AdDn)
+    }
+    Default {
+        $DestOU = ('OU=Quarantine-PC,{0}' -f $AdDn)
+    }
+}
+
+# Domain Controllers
+If ($VmName -like 'DC') {
+    $DestOU = ('OU=InfraStaging,OU=Infra,OU=Admin,{0}' -f $AdDn)
+}
+
+# Tier1 OU
+If ('Srv5', 'Srv6', 'Srv7', 'Srv8', 'Srv9', 'Srv10', 'Srv11', 'Srv12', 'Srv13', 'Srv14', 'Srv15', 'Srv16', 'Srv17', 'Srv18', 'Srv19', 'Srv20' -Contains $vmName) {
+    $DestOU = ('OU=Servers,{0}' -f $AdDn)
+}
+
+If ('SQL3', 'Srv4' -Contains $vmName) {
+    $DestOU = ('OU=Sql,OU=Servers,{0}' -f $AdDn)
+}
+
+If ('Linux3', 'Linux4', 'Linux5', 'Linux6' -Contains $vmName) {
+    $DestOU = ('OU=Linux,OU=Servers,{0}' -f $AdDn)
+}
+
+
+# Domain Join section of the Unattend file
+If ($VmName -ne ('DC1' -or 'DC5' -or 'DC9')) {
+    $UnattendDomainJoin = @"
+<component name="Microsoft-Windows-UnattendedJoin" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <Identification>
+                <Credentials>
+                    <Domain>$DnsDomainName</Domain>
+                    <Password>P@ssword 123456</Password>
+                    <Username>TheUgly</Username>
+                </Credentials>
+                <JoinDomain>$DnsDomainName</JoinDomain>
+                <MachineObjectOU>$DestOU</MachineObjectOU>
+            </Identification>
+        </component>
+"@
+} else {
+    $UnattendDomainJoin = $null
+}
+
+
+# Generate Unattend file
+$unattend = @"
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <servicing></servicing>
+    <settings pass="generalize">
+        <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SkipRearm>1</SkipRearm>
+        </component>
+        <component name="Microsoft-Windows-PnpSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+        </component>
+    </settings>
+    <settings pass="specialize">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <InputLocale>0c0a:0000040a</InputLocale>
+            <SystemLocale>es-ES</SystemLocale>
+            <UILanguage>en-US</UILanguage>
+            <UILanguageFallback>es-ES</UILanguageFallback>
+            <UserLocale>es-ES</UserLocale>
+        </component>
+        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SkipAutoActivation>true</SkipAutoActivation>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <ComputerName>$VmName</ComputerName>
+            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
+            <TimeZone>Romance Standard Time</TimeZone>
+        </component>
+        <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <CEIPEnabled>0</CEIPEnabled>
+        </component>
+        $UnattendIpConfig
+        $UnattendDomainJoin
+    </settings>
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <FirstLogonCommands>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}</CommandLine>
+                    <Description>Set Execution Policy to RemoteSigned</Description>
+                    <Order>1</Order>
+                    <RequiresUserInput>false</RequiresUserInput>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>2</Order>
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Enable-PSRemoting -SkipNetworkProfileCheck -Force}</CommandLine>
+                    <Description>Enable PsRemoting</Description>
+                    <RequiresUserInput>false</RequiresUserInput>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>3</Order>
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell -Value 'pwsh.exe -NoExit'}</CommandLine>
+                    <Description>Make PowerShell the default shell</Description>
+                    <RequiresUserInput>false</RequiresUserInput>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>4</Order>
+                    <CommandLine>powercfg /h /type Off</CommandLine>
+                    <Description>Reduce hiberfile size</Description>
+                    <RequiresUserInput>false</RequiresUserInput>
+                </SynchronousCommand>
+            </FirstLogonCommands>
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <HideLocalAccountScreen>false</HideLocalAccountScreen>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <ProtectYourPC>1</ProtectYourPC>
+            </OOBE>
+            <UserAccounts>
+                <AdministratorPassword>
+                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYAQQBkAG0AaQBuAGkAcwB0AHIAYQB0AG8AcgBQAGEAcwBzAHcAbwByAGQA</Value>
+                    <PlainText>false</PlainText>
+                </AdministratorPassword>
+            </UserAccounts>
+            <Display>
+                <HorizontalResolution>1920</HorizontalResolution>
+                <VerticalResolution>1080</VerticalResolution>
+            </Display>
+            <AutoLogon>
+                <Password>
+                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYAUABhAHMAcwB3AG8AcgBkAA==</Value>
+                    <PlainText>false</PlainText>
+                </Password>
+                <Enabled>true</Enabled>
+                <LogonCount>5</LogonCount>
+                <Username>Administrator</Username>
+            </AutoLogon>
+            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
+            <TimeZone>Romance Standard Time</TimeZone>
+        </component>
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <InputLocale>0c0a:0000040a</InputLocale>
+            <SystemLocale>es-ES</SystemLocale>
+            <UILanguage>en-US</UILanguage>
+            <UILanguageFallback>es-ES</UILanguageFallback>
+            <UserLocale>es-ES</UserLocale>
+        </component>
+        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DisableAntiSpyware>false</DisableAntiSpyware>
+            <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
+        </component>
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <InputLocale>0c0a:0000040a</InputLocale>
+            <SystemLocale>es-ES</SystemLocale>
+            <UILanguage>es-ES</UILanguage>
+            <UserLocale>es-ES</UserLocale>
+            <UILanguageFallback>en-US</UILanguageFallback>
+        </component>
+    </settings>
+    <settings pass="offlineServicing">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <OfflineUserAccounts>
+                <OfflineAdministratorPassword>
+                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYATwBmAGYAbABpAG4AZQBBAGQAbQBpAG4AaQBzAHQAcgBhAHQAbwByAFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                    <PlainText>false</PlainText>
+                </OfflineAdministratorPassword>
+            </OfflineUserAccounts>
+            <ComputerName>$VmName</ComputerName>
+            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <OfflineUserAccounts>
+                <OfflineAdministratorPassword>
+                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYATwBmAGYAbABpAG4AZQBBAGQAbQBpAG4AaQBzAHQAcgBhAHQAbwByAFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                    <PlainText>false</PlainText>
+                </OfflineAdministratorPassword>
+            </OfflineUserAccounts>
+            <ComputerName>$VmName</ComputerName>
+            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
+        </component>
+        <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <EnableLUA>false</EnableLUA>
+        </component>
+    </settings>
+</unattend>
+"@
+
+# Copy the above unattend to VHDX C:\Windows\Panther\unattend.xml (Alternatively to C:\Windows\System32\Sysprep\Unattend.xml)
+# Set-Content -Value $unattend -Path ('{0}:\Windows\Panther\unattend.xml' -f $mount.Trim())
+Write-Verbose -Message 'Creating Unattend.xml file on new VM.'
+Set-Content -Value $unattend -Path ('{0}\Windows\Panther\unattend.xml' -f $TempMount)
+
+Write-Verbose -Message 'Copy of Unattend.xml file created on C:\VMs\Unattend-01-01-1600.xml'
+Set-Content -Value $unattend -Path ('C:\VMs\Unattend_{0}.xml' -f (Get-Date -Format 'dd-MMM-yyyy'))
+
+# Make windows to use the unattend.xml file
+#Use-WindowsUnattend -Path ('{0}:\' -f $mount.Trim()) -UnattendPath ('{0}:\Windows\Panther\unattend.xml' -f $mount.Trim()) -LogLevel WarningsInfo
+Write-Verbose -Message 'Sealing image after apply Unattend.xml'
+Use-WindowsUnattend -Path $TempMount -UnattendPath ('{0}\Windows\Panther\unattend.xml' -f $TempMount) -LogLevel WarningsInfo
+
+#Dismount Image
+Dismount-DiskImage -ImagePath $vmVhdNewDisk -StorageType VHDX
+
+# Remove the mountPoint
+Remove-Item $TempMount -Force
+
+# Configure additional disks on DC
+If ($CurrentHost.Disks -eq 'Multiple-Disks') {
+    Write-Verbose -Message 'Creating additional disk for DomainController'
+    $DcDisks = @(
+        'N-NTDS',
+        'L-NTDSlogs',
+        'S-SYSVOL',
+        'P-Pagefile',
+        'T-Temp',
+        'E-EventLogs'
+    )
+    Foreach ($Disk in $DcDisks) {
+        # Get the current disk path
+        $CurrentDisk = '{0}\{1}\{2}.vhdx' -f $VmFolder, $vmName, $Disk
+
+        #Check if current disk exists
+        $DiskExists = Get-VHD -Path $CurrentDisk -ErrorAction SilentlyContinue
+        If ($DiskExists) {
+            Remove-Item $CurrentDisk -Force | Out-Null
+        }
+
+        #Create the disk
+        $splat = @{
+            Path      = $CurrentDisk
+            SizeBytes = 32GB
+            Dynamic   = $true
+        }
+        New-VHD @splat | Out-Null
+
+        # Attach the disk
+        Add-VMHardDiskDrive -VMName $vmName -Path $CurrentDisk -ControllerType SCSI
+    }
+}
+
+# Starting VM
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host '       Starting VM'
+Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
+Write-Host
+Start-VM -VM $VM
+Wait-VM -VM $vm -For Heartbeat
+
+
+
+
+Wait-VM -VM $vm -For Heartbeat
+
+Write-Host '#########################################################################' -ForegroundColor green
+Write-Host '#                                                                       #' -ForegroundColor green
+Write-Host '#      Virtual Machine created. Now you can start playing with it.      #' -ForegroundColor green
+Write-Host '#                                                                       #' -ForegroundColor green
+Write-Host '#########################################################################' -ForegroundColor green
+
+
+
+# $VmSwitchName = New-VMSwitch -Name 'LAN' -SwitchType External -Notes 'vSwitch (LAN) used for VM to communicate, having physical host ICS enabled for this switch'
+
+# GET-VM | GET-VMNetworkAdapter | Connect-VMNetworkAdapter -Switchname 'vSwitch'
+
+# Set-NetConnectionProfile -InterfaceAlias 'LAN' -NetworkCategory Private
