@@ -183,6 +183,117 @@
         <GoogleDns1Ipv6>2001:4860:4860::8888</GoogleDns1Ipv6>
         <GoogleDns2Ipv6>2001:4860:4860::8844</GoogleDns2Ipv6>
     </IP>
+    <IPsec>
+        <Global>
+            <IPsecStrongCrlCheck>0</IPsecStrongCrlCheck>
+            <IPsecExemptions>ICMP</IPsecExemptions>
+            <IPsecEncapsulation>AH,ESP</IPsecEncapsulation>
+            <IPsecKeyExchange>dh20</IPsecKeyExchange>
+            <IPsecQMHash>aesgmac256</IPsecQMHash>
+            <IPsecMMHash>sha384</IPsecMMHash>
+            <IPsecQMEncryption>aesgcm256</IPsecQMEncryption>
+            <IPsecMMEncryption>aes256</IPsecMMEncryption>
+            <IPsecKeyModule>Default</IPsecKeyModule>
+        </Global>
+        <Rules>
+            <Rule Name="RF-ANY-ANY-Isolation"
+                Inbound="Require"
+                Outbound="Require"
+                LocalAddress="ANY"
+                RemoteAddress="ANY"
+                LocalPort=""
+                RemotePort=""
+                Protocol="ANY"
+                GPO="C-Baseline"
+                Location="RF.EguibarIT.local"
+                Description=""
+            />
+            <Rule Name="RF-WSUS-WU"
+                Inbound="Require"
+                Outbound="Request"
+                LocalAddress="192.168.0.20"
+                RemoteAddress="192.168.1.1"
+                LocalPort="ANY"
+                RemotePort="8080"
+                Protocol="TCP"
+                GPO="C-WSUS-Baseline"
+                Location="WSUS Servers"
+                Description=""
+            />
+            <Rule Name="RF-UDP-DCs-NTP"
+                Inbound="Require"
+                Outbound="Request"
+                LocalAddress="ANY"
+                RemoteAddress="192.168.1.1"
+                LocalPort="ANY"
+                RemotePort="123"
+                Protocol="UDP"
+                GPO="C-DomainControllers-Baseline"
+                Location="Domain Controllers"
+                Description=""
+            />
+            <Rule Name="RF-Workstations-DC-DomainJoinException"
+                Inbound="Request"
+                Outbound="Request"
+                LocalAddress="192.168.0.240"
+                RemoteAddress="192.168.0.150,192.168.0.50"
+                LocalPort=""
+                RemotePort=""
+                Protocol="ANY"
+                GPO="C-Baseline"
+                Location="RF.EguibarIT.local"
+                Description=""
+            />
+            <Rule Name="RF-Workstations-CA-DomainJoinException"
+                Inbound="Request"
+                Outbound="Request"
+                LocalAddress="192.168.0.240"
+                RemoteAddress="192.168.0.24"
+                LocalPort=""
+                RemotePort=""
+                Protocol="ANY"
+                GPO="C-Baseline"
+                Location="RF.EguibarIT.local"
+                Description=""
+            />
+            <Rule Name="RF-Workstations-MDT-DomainJoinException"
+                Inbound="Request"
+                Outbound="Request"
+                LocalAddress="192.168.0.240"
+                RemoteAddress="192.168.0.234"
+                LocalPort=""
+                RemotePort=""
+                Protocol="ANY"
+                GPO="C-Baseline"
+                Location="RF.EguibarIT.local"
+                Description=""
+            />
+            <Rule Name="RF-SCOM-SMTP"
+                Inbound="Require"
+                Outbound="Request"
+                LocalAddress="192.168.0.94"
+                RemoteAddress="192.168.1.1"
+                ocalPort="ANY"
+                RemotePort="25"
+                Protocol="TCP"
+                GPO="C-SCOM-Baseline"
+                Location="SCOM Servers"
+                Description=""
+            />
+            <Rule Name="RF-SCOM-DOMAIN1-SCOMGW"
+                Inbound="Require"
+                Outbound="Require"
+                LocalAddress="192.168.0.94"
+                RemoteAddress="192.168.0.50"
+                LocalPort="ANY"
+                RemotePort="5723"
+                Protocol="TCP"
+                GPO="C-SCOM-Baseline"
+                Location="SCOM Servers"
+                Description=""
+            />
+        </Rules>
+    </IPsec>
     <NTP>0.europe.pool.ntp.org,0x9 1.europe.pool.ntp.org,0xA 2.europe.pool.ntp.org,0xA 3.europe.pool.ntp.org,0xA</NTP>
     <userCSVfile>StarWars-Users.csv</userCSVfile>
     <groupCSVfile>group.csv</groupCSVfile>
