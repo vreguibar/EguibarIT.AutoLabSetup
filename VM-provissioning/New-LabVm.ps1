@@ -83,7 +83,7 @@ If (-not $PSBoundParameters['DataFile']) {
 
 $VM = $null
 $Splat = $null
-$CurrentHost = $null
+$PC = $null
 $DefaultGatewayIpV4 = $null
 $DefaultGatewayIpV6 = $null
 $DNS1IpV4 = $null
@@ -409,7 +409,7 @@ If (Test-Path -Path $DataFile) {
     if ($ht.AllNodes.ForEach({ $_.NodeName }).contains($VmName)) {
 
         # Define Hashtable to hold the values from configuration file (PSD1)
-        $CurrentHost = @{
+        $PC = @{
             NodeName           = [System.String]
             DefaultGatewayIpV4 = [System.String]
             DefaultGatewayIpV6 = [System.String]
@@ -438,32 +438,32 @@ If (Test-Path -Path $DataFile) {
         Foreach ($item in $ht.AllNodes) {
             # Get wildcard data (all nodes)
             If ($item.NodeName -eq '*') {
-                [System.String]$DefaultGatewayIpV4 = $item.DefaultGatewayIpV4
-                [System.String]$DefaultGatewayIpV6 = $item.DefaultGatewayIpV6
-                [System.String]$DNS1IpV4 = $item.DNS1IpV4
-                [System.String]$DNS2IpV4 = $item.DNS2IpV4
-                [System.String]$DNS3IpV4 = $item.DNS3IpV4
-                [System.String]$DNS4IpV4 = $item.DNS4IpV4
-                [System.String]$DNS5IpV4 = $item.DNS5IpV4
-                [System.String]$DNS1IpV6 = $item.DNS1IpV6
-                [System.String]$DNS2IpV6 = $item.DNS2IpV6
-                [System.String]$DNS3IpV6 = $item.DNS3IpV6
-                [System.String]$DNS4IpV6 = $item.DNS4IpV6
-                [System.String]$DNS5IpV6 = $item.DNS5IpV6
-                $CurrentHost.TimeZone = $item.TimeZone
+                $PC.DefaultGatewayIpV4 = $item.DefaultGatewayIpV4
+                $PC.DefaultGatewayIpV6 = $item.DefaultGatewayIpV6
+                $PC.DNS1IpV4 = $item.DNS1IpV4
+                $PC.DNS2IpV4 = $item.DNS2IpV4
+                $PC.DNS3IpV4 = $item.DNS3IpV4
+                $PC.DNS4IpV4 = $item.DNS4IpV4
+                $PC.DNS5IpV4 = $item.DNS5IpV4
+                $PC.DNS1IpV6 = $item.DNS1IpV6
+                $PC.DNS2IpV6 = $item.DNS2IpV6
+                $PC.DNS3IpV6 = $item.DNS3IpV6
+                $PC.DNS4IpV6 = $item.DNS4IpV6
+                $PC.DNS5IpV6 = $item.DNS5IpV6
+                $PC.TimeZone = $item.TimeZone
             } # End If
 
             # Get specific host data
             If ($item.NodeName -eq $VmName) {
-                $IPv4 = $item.IPv4
-                $IPv6 = $item.IPv6
-                $CurrentHost.NetBIOSDomainName = $item.NetBIOSDomainName
-                $DnsDomainName = $item.DnsDomainName
-                $CurrentHost.Description = $item.Description
+                $PC.IPv4 = $item.IPv4
+                $PC.IPv6 = $item.IPv6
+                $PC.NetBIOSDomainName = $item.NetBIOSDomainName
+                $PC.DnsDomainName = $item.DnsDomainName
+                $PC.Description = $item.Description
                 Try {
-                    $CurrentHost.Disks = $item.Disks
+                    $PC.Disks = $item.Disks
                 } Catch {
-                    $CurrentHost.Disks = 'SingleDisk'
+                    $PC.Disks = 'SingleDisk'
                 }
             } # End If
         } # End Foreach
@@ -472,20 +472,20 @@ If (Test-Path -Path $DataFile) {
 
 } # Get and prepare IP configuration
 
-Write-Verbose -Message ('Ipv4 address:         {0}' -f $IPv4)
-Write-Verbose -Message ('Ipv4 Default gateway: {0}' -f $DefaultGatewayIpV4)
-Write-Verbose -Message ('Ipv4 Primary DNS:     {0}' -f $DNS1IpV4 )
-Write-Verbose -Message ('Ipv4 Secondary DNS:   {0}' -f $DNS2IpV4)
-Write-Verbose -Message ('Ipv4 additional DNS:  {0}, {1} and {2}' -f $DNS3IpV4, $DNS4IpV4, $DNS5IpV4)
+Write-Verbose -Message ('Ipv4 address:         {0}' -f $PC.IPv4)
+Write-Verbose -Message ('Ipv4 Default gateway: {0}' -f $PC.DefaultGatewayIpV4)
+Write-Verbose -Message ('Ipv4 Primary DNS:     {0}' -f $PC.DNS1IpV4 )
+Write-Verbose -Message ('Ipv4 Secondary DNS:   {0}' -f $PC.DNS2IpV4)
+Write-Verbose -Message ('Ipv4 additional DNS:  {0}, {1} and {2}' -f $PC.DNS3IpV4, $PC.DNS4IpV4, $PC.DNS5IpV4)
 
-Write-Verbose -Message ('Ipv6 address:         {0}' -f $IPv6)
-Write-Verbose -Message ('Ipv6 Default gateway: {0}' -f $DefaultGatewayIpV6)
-Write-Verbose -Message ('Ipv6 Primary DNS:     {0}' -f $DNS1IpV6 )
-Write-Verbose -Message ('Ipv6 Secondary DNS:   {0}' -f $DNS2IpV6)
-Write-Verbose -Message ('Ipv6 additional DNS:  {0}, {1} and {2}' -f $DNS3IpV6, $DNS4IpV6, $DNS5IpV6)
+Write-Verbose -Message ('Ipv6 address:         {0}' -f $PC.IPv6)
+Write-Verbose -Message ('Ipv6 Default gateway: {0}' -f $PC.DefaultGatewayIpV6)
+Write-Verbose -Message ('Ipv6 Primary DNS:     {0}' -f $PC.DNS1IpV6 )
+Write-Verbose -Message ('Ipv6 Secondary DNS:   {0}' -f $PC.DNS2IpV6)
+Write-Verbose -Message ('Ipv6 additional DNS:  {0}, {1} and {2}' -f $PC.DNS3IpV6, $PC.DNS4IpV6, $PC.DNS5IpV6)
 
 # IP configuration section of the Unattend file
-if ($ipv4 -or $ipv6) {
+if ($PC.ipv4 -or $PC.ipv6) {
     $UnattendIpConfig = @"
 <component name="Microsoft-Windows-TCPIP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Interfaces>
@@ -502,20 +502,20 @@ if ($ipv4 -or $ipv6) {
                         <RouterDiscoveryEnabled>false</RouterDiscoveryEnabled>
                     </Ipv6Settings>
                     <UnicastIpAddresses>
-                        <IpAddress wcm:action="add" wcm:keyValue="1">$IPv4</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="2">$IPv6</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="1">$($PC.IPv4)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="2">$($PC.IPv6)</IpAddress>
                     </UnicastIpAddresses>
                     <Routes>
                         <Route wcm:action="add">
                             <Identifier>0</Identifier>
                             <Metric>10</Metric>
-                            <NextHopAddress>$DefaultGatewayIpV4</NextHopAddress>
+                            <NextHopAddress>$($PC.DefaultGatewayIpV4)</NextHopAddress>
                             <Prefix>0.0.0.0/0</Prefix>
                         </Route>
                         <Route wcm:action="add">
                             <Identifier>1</Identifier>
                             <Metric>10</Metric>
-                            <NextHopAddress>$DefaultGatewayIpV6</NextHopAddress>
+                            <NextHopAddress>$($PC.DefaultGatewayIpV6)</NextHopAddress>
                             <Prefix>::0/0</Prefix>
                         </Route>
                     </Routes>
@@ -527,24 +527,24 @@ if ($ipv4 -or $ipv6) {
                 <Interface wcm:action="add">
                     <Identifier>$TmpMAC</Identifier>
                     <DNSServerSearchOrder>
-                        <IpAddress wcm:action="add" wcm:keyValue="1">$DNS1IpV4</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="2">$DNS2IpV4</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="3">$DNS3IpV4</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="4">$DNS4IpV4</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="5">$DNS5IpV4</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="6">$DNS1IpV6</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="7">$DNS2IpV6</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="8">$DNS3IpV6</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="9">$DNS4IpV6</IpAddress>
-                        <IpAddress wcm:action="add" wcm:keyValue="10">$DNS5IpV6</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="1">$($PC.DNS1IpV4)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="2">$($PC.DNS2IpV4)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="3">$($PC.DNS3IpV4)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="4">$($PC.DNS4IpV4)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="5">$($PC.DNS5IpV4)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="6">$($PC.DNS1IpV6)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="7">$($PC.DNS2IpV6)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="8">$($PC.DNS3IpV6)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="9">$($PC.DNS4IpV6)</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="10">$($PC.DNS5IpV6)</IpAddress>
                     </DNSServerSearchOrder>
-                    <DNSDomain>EguibarIT.local</DNSDomain>
+                    <DNSDomain>$($PC.DnsDomainName)</DNSDomain>
                     <DisableDynamicUpdate>false</DisableDynamicUpdate>
                     <EnableAdapterDomainNameRegistration>true</EnableAdapterDomainNameRegistration>
                 </Interface>
             </Interfaces>
             <DNSSuffixSearchOrder>
-                <DomainName wcm:action="add" wcm:keyValue="1">EguibarIT.local</DomainName>
+                <DomainName wcm:action="add" wcm:keyValue="1">$($PC.DnsDomainName)</DomainName>
             </DNSSuffixSearchOrder>
         </component>
 "@
@@ -636,11 +636,11 @@ If ($VmName -ne ('DC1' -or 'DC5' -or 'DC9')) {
 <component name="Microsoft-Windows-UnattendedJoin" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Identification>
                 <Credentials>
-                    <Domain>$DnsDomainName</Domain>
+                    <Domain>$($PC.DnsDomainName)</Domain>
                     <Password>P@ssword 123456</Password>
                     <Username>TheUgly</Username>
                 </Credentials>
-                <JoinDomain>$DnsDomainName</JoinDomain>
+                <JoinDomain>$($PC.DnsDomainName)</JoinDomain>
                 <MachineObjectOU>$DestOU</MachineObjectOU>
             </Identification>
         </component>
@@ -814,7 +814,7 @@ Dismount-DiskImage -ImagePath $vmVhdNewDisk -StorageType VHDX
 Remove-Item $TempMount -Force
 
 # Configure additional disks on DC
-If ($CurrentHost.Disks -eq 'Multiple-Disks') {
+If ($PC.Disks -eq 'Multiple-Disks') {
     Write-Verbose -Message 'Creating additional disk for DomainController'
     $DcDisks = @(
         'N-NTDS',
