@@ -3,6 +3,7 @@ Param(
 
     # Param1 VM new name
     [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+        HelpMessage = 'Name of the Virtual Machine. This name will be used for the VM name on Hyper-V and for the Windows host name.',
         Position = 0)]
     [ValidateNotNullOrEmpty()]
     [ValidateLength(0, 20)]
@@ -11,6 +12,7 @@ Param(
 
     # Param2 integer representing the OS type of the VM
     [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+        HelpMessage = 'Type of OS for the Virtual Machine.',
         Position = 1)]
     [ValidateNotNullOrEmpty()]
     [ValidateSet('Win10', 'Win11', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE')]
@@ -19,6 +21,7 @@ Param(
 
     # Param3 Data File
     [Parameter(Mandatory = $false, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+        HelpMessage = 'File containing the configuration data of the new VM (just in case VM name exists)',
         Position = 2)]
     [string]
     $DataFile
@@ -28,24 +31,27 @@ Param(
 .Synopsis
    Create a MOD virtual machine
 .DESCRIPTION
-   Create a MOD (modified) virtual machine by providing only 2 parameters.
-   This script is harcoded to use my laptop virtual environment.
+   Create a MOD (modified) virtual machine by providing only 3 parameters.
+   This script is harcoded to use my laptop virtual environment; this must be changed to fit your own needs.
    All VMs go into C:\VMs
    Any created VM has a differential disk based on existing master disks
    Win 10, Win 11, Win 2019, Win 2019 Core, Win 2022, Win 2022 Core
    The Windows Hostname will be the same as the VM name provided.
 .EXAMPLE
    To create Win 8.1 called VMWIN8
-   New-LabVm -vmName VMWIN8 -vmOsType 'Win8.1'
+   New-LabVm -vmName VMWIN8 -vmOsType 'Win11'
 .EXAMPLE
-   To create Win 8.1 called Srv2012
-   New-LabVm Srv2012 'W2k12R2'
-.INPUTS
-   Param1 vmName:......String. Name of the new Virtual Machine
-   Param2 vmOsType:....Type of OS. 'Win10', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE'
+   To create Win Server 2022 Core called Srv01
+   New-LabVm Srv01 'W2022-CORE'
+.PARAMETER vmName
+    Name of the Virtual Machine. This name will be used for the VM name on Hyper-V and for the Windows host name.
+.PARAMETER vmOsType
+    Type of OS for the Virtual Machine.
+.PARAMETER DataFile
+    File containing the configuration data of the new VM (just in case VM name exists)
 .NOTES
-    Version:         1.6
-    DateModified:    28/Jun/2022
+    Version:         1.7
+    DateModified:    8/Mar/2024
     LasModifiedBy:   Vicente Rodriguez Eguibar
                      vicente@eguibarIT.com
                      Eguibar Information Technology S.L.
@@ -77,28 +83,13 @@ If (-not $PSBoundParameters['DataFile']) {
 
 ################################################################################
 # Variables
-#[System.String]$VmSwitchName  = 'vSwitch'
+
 [System.String]$VmSwitchName = 'LAN'
 [System.Int32]$ProcessorCount = 2
 
 $VM = $null
 $Splat = $null
 $PC = $null
-$DefaultGatewayIpV4 = $null
-$DefaultGatewayIpV6 = $null
-$DNS1IpV4 = $null
-$DNS2IpV4 = $null
-$DNS3IpV4 = $null
-$DNS4IpV4 = $null
-$DNS5IpV4 = $null
-$DNS1IpV6 = $null
-$DNS2IpV6 = $null
-$DNS3IpV6 = $null
-$DNS4IpV6 = $null
-$DNS5IpV6 = $null
-$IPv4 = $null
-$IPv6 = $null
-$DnsDomainName = $null
 
 [System.Int64]$MemoryStartupBytes = 1024MB
 [System.Int64]$MemoryMinimum = 512MB
@@ -152,20 +143,16 @@ If (-not $VmSwitch) {
 $MastersRoot = 'C:\VMs\Masters'
 
 switch ($vmOsType) {
+
     # Option 1 -> Windows 10
     'Win10' {
-        # Master Disk Name _OK_Win10x64.vhdx
-
         # Set the Master Disk path name
-        #$vmVhdParentDisk = 'C:\VMs\_OK_Win10x64-27-Dec-2019.vhdx'
         $vmVhdParentDisk = '{0}\_OK_Win10x64-Jan-2021.vhdx' -f $MastersRoot
 
     } #----- End of Option 1 -----
 
     # Option 2 -> Windows Server 2019 DesktopExperience
     'W2k19' {
-        # Master Disk Name _OK_W2k19-6-12-2018.vhdx
-
         # Set the Master Disk path name
         $vmVhdParentDisk = '{0}\_OK_W2019-GUI-Dec-2020.vhdx' -f $MastersRoot
 
@@ -181,10 +168,8 @@ switch ($vmOsType) {
 
     # Option 3 -> Windows Server 2019 CORE
     'W2k19-CORE' {
-        # Master Disk Name _OK_W2019-Core-5-12-2018.vhdx
 
         # Set the Master Disk path name
-        #$vmVhdParentDisk = '{0}\_OK_W2019-Core-25-Feb-2020.vhdx'
         $vmVhdParentDisk = '{0}\_OK_W2019-Core-Dec-2020.vhdx' -f $MastersRoot
 
         #Define memory params
@@ -199,8 +184,6 @@ switch ($vmOsType) {
 
     # Option 4 -> Windows Server 2022 DesktopExperience
     'W2022' {
-        # Master Disk Name _OK_W2022-GUI-Oct-2021.vhdx
-
         # Set the Master Disk path name
         $vmVhdParentDisk = '{0}\_OK_W2022-GUI-Dec-2023.vhdx' -f $MastersRoot
 
@@ -216,7 +199,6 @@ switch ($vmOsType) {
 
     # Option 5 -> Windows Server 2022 CORE
     'W2022-CORE' {
-        # Master Disk Name _OK_W2022-Core-June2022.vhdx
 
         # Set the Master Disk path name
         $vmVhdParentDisk = '{0}\_OK_W2022-Core-Feb2024.vhdx' -f $MastersRoot
@@ -233,10 +215,10 @@ switch ($vmOsType) {
 
     # Option 6 -> Windows 11
     'Win11' {
-        # Master Disk Name OK_Win11-Oct-2021.vhdx
 
         # Set the Master Disk path name
         $vmVhdParentDisk = '{0}\_OK_Win11-Dec2023.vhdx' -f $MastersRoot
+
     } #----- End of Option 6 -----
 
 } # --- End of switch ---
@@ -403,7 +385,7 @@ If (Test-Path -Path $DataFile) {
         Write-Verbose -Message ('Data File {0} loaded succesfully' -f $DataFile)
     } catch {
         throw
-    }
+    } #end Try-Catch
 
     # Check if newly created VM exist on the configuration
     if ($ht.AllNodes.ForEach({ $_.NodeName }).contains($VmName)) {
@@ -550,11 +532,11 @@ if ($PC.ipv4 -or $PC.ipv6) {
 "@
 } else {
     $UnattendIpConfig = $null
-}
+} #end If-Else
 
 
 # Get Domain DN
-[string]$AdDn = $DnsDomainName
+[string]$AdDn = $PC.DnsDomainName
 $AdDn = 'DC={0},DC={1}' -f $AdDn.split('.')[0], $AdDn.split('.')[1]
 
 # Tier0 OUs
@@ -609,29 +591,32 @@ switch -wildcard ($VmName) {
     Default {
         $DestOU = ('OU=Quarantine-PC,{0}' -f $AdDn)
     }
-}
+} #end Switch
 
 # Domain Controllers
 If ($VmName -like 'DC') {
     $DestOU = ('OU=InfraStaging,OU=Infra,OU=Admin,{0}' -f $AdDn)
-}
+} #end If
 
 # Tier1 OU
 If ('Srv5', 'Srv6', 'Srv7', 'Srv8', 'Srv9', 'Srv10', 'Srv11', 'Srv12', 'Srv13', 'Srv14', 'Srv15', 'Srv16', 'Srv17', 'Srv18', 'Srv19', 'Srv20' -Contains $vmName) {
     $DestOU = ('OU=Servers,{0}' -f $AdDn)
-}
+} #end If
 
 If ('SQL3', 'Srv4' -Contains $vmName) {
     $DestOU = ('OU=Sql,OU=Servers,{0}' -f $AdDn)
-}
+} #end If
 
 If ('Linux3', 'Linux4', 'Linux5', 'Linux6' -Contains $vmName) {
     $DestOU = ('OU=Linux,OU=Servers,{0}' -f $AdDn)
-}
+} #end If
 
 
 # Domain Join section of the Unattend file
 If ($VmName -ne ('DC1' -or 'DC5' -or 'DC9')) {
+
+    Write-Verbose -Message ('Destination OU for {0} will be "{1}"' -f $VmName, $DestOU)
+
     $UnattendDomainJoin = @"
 <component name="Microsoft-Windows-UnattendedJoin" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Identification>
@@ -645,9 +630,14 @@ If ($VmName -ne ('DC1' -or 'DC5' -or 'DC9')) {
             </Identification>
         </component>
 "@
+
 } else {
+
+    Write-Verbose -Message ('VM {0} will not be joined to any domain' -f $VmName)
+
     $UnattendDomainJoin = $null
-}
+
+} #end If-Else
 
 
 # Generate Unattend file
