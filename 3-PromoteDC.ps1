@@ -257,6 +257,7 @@ If ($DcDisks) {
 } #end If
 
 
+[hashtable]$Splat = [hashtable]::New()
 
 
 ###############################################################################
@@ -268,7 +269,7 @@ If ($DcDisks) {
 Import-Module -Name ADDSDeployment -Force
 
 # configure new forest
-$parameters = @{
+$Splat = @{
     DomainName                    = $confXML.N.PCs.DC1.DnsDomainName
     DomainNetbiosName             = $confXML.N.PCs.DC1.NetBIOSDomainName
     DomainMode                    = $confXML.N.DcPromo.DomainLevel
@@ -281,21 +282,21 @@ $parameters = @{
 }
 
 if ($DcDisks -eq 'Multiple-Disks') {
-    $parameters.Add('DatabasePath', 'N:\NTDS')
+    $Splat.Add('DatabasePath', 'N:\NTDS')
 } else {
-    $parameters.Add('DatabasePath', $confXML.N.DcPromo.NtdsPath)
+    $Splat.Add('DatabasePath', $confXML.N.DcPromo.NtdsPath)
 }
 
 if ($DcDisks -eq 'Multiple-Disks') {
-    $parameters.Add('SysvolPath', 'S:\SYSVOL')
+    $Splat.Add('SysvolPath', 'S:\SYSVOL')
 } else {
-    $parameters.Add('SysvolPath', $confXML.N.DcPromo.SysvolPath)
+    $Splat.Add('SysvolPath', $confXML.N.DcPromo.SysvolPath)
 }
 
 if ($DcDisks -eq 'Multiple-Disks') {
-    $parameters.Add('LogPath', 'L:\NTDS-LOGs')
+    $Splat.Add('LogPath', 'L:\NTDS-LOGs')
 } else {
-    $parameters.Add('LogPath', $confXML.N.DcPromo.NtdsLogsPath)
+    $Splat.Add('LogPath', $confXML.N.DcPromo.NtdsLogsPath)
 }
 
 Install-ADDSForest @parameters
