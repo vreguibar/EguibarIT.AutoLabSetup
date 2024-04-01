@@ -299,7 +299,7 @@ if ($DcDisks -eq 'Multiple-Disks') {
     $Splat.Add('LogPath', $confXML.N.DcPromo.NtdsLogsPath)
 }
 
-Install-ADDSForest @parameters
+Install-ADDSForest @Splat
 
 
 
