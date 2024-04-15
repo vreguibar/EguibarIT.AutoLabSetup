@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RegistrySettings clsid="{A3CCFC41-DFDB-43a5-8D26-0FE8B954DA51}">
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="AnnounceFlags" status="AnnounceFlags" image="2" changed="2024-03-01 11:28:22" uid="{47D5A2C6-C693-4875-989A-796B4E7569D2}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\Config" name="AnnounceFlags" type="REG_DWORD" value="00000005" />
+  </Registry>
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="NtpServer" status="NtpServer" image="2" changed="2024-03-01 11:28:22" uid="{701FB7BA-1307-4B06-A1AA-1E778400B566}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\Parameters" name="NtpServer" type="REG_SZ" value="System.Management.Automation.PSBoundParametersDictionary['NtpServer']" />
+  </Registry>
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="Type" status="Type" image="2" changed="2024-03-01 11:28:22" uid="{C4CDD068-BC7E-4ADD-82FD-C67508AF772F}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\Parameters" name="Type" type="REG_SZ" value="System.Management.Automation.PSBoundParametersDictionary['Type']" />
+  </Registry>
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="Enabled" status="Enabled" image="2" changed="2024-03-01 11:28:22" uid="{34390A87-A81D-45CB-8710-FCA3A58BB940}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\Parameters" name="Enabled" type="REG_DWORD" value="00000000" />
+  </Registry>
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="SpecialPollInterval" status="SpecialPollInterval" image="2" changed="2024-03-01 11:28:22" uid="{EFC2610E-4AB6-4D36-969C-8FCCCE9DEA53}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient" name="SpecialPollInterval" type="REG_DWORD" value="00000384" />
+  </Registry>
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="MaxPosPhaseCorrection" status="MaxPosPhaseCorrection" image="2" changed="2024-03-01 11:28:22" uid="{2D3A8451-7DBD-4136-A473-C10E5E728267}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\Config" name="MaxPosPhaseCorrection" type="REG_DWORD" value="00000E10" />
+  </Registry>
+  <Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="MaxNegPhaseCorrection" status="MaxNegPhaseCorrection" image="2" changed="2024-03-01 11:28:22" uid="{70396A5C-8012-473E-A3EC-4A6594179519}" disabled="0">
+    <Properties action="U" displayDecimal="0" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Services\W32Time\Config" name="MaxNegPhaseCorrection" type="REG_DWORD" value="00000E10" />
+  </Registry>
+</RegistrySettings>
