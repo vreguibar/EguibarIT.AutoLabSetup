@@ -1,24 +1,23 @@
-Name                                                    Value
-----                                                    -----
-Set Time Settings on non-PDCe Domain Controllers        {E8BDF7DC-0870-4E99-AABE-7A66DED1AF1E}
-U-Baseline                                              {13861E2A-3EA2-41B7-B88C-0EF81E57A8C7}
-C-ItAdmin-Baseline                                      {1088E54A-B673-4645-9B37-1D4D14A5C8B8}
-C-File-Baseline                                         {5C450516-81E1-4B54-9B0D-530AFB7AE594}
-C-InfraT0-Baseline                                      {6D768CF7-502C-434A-805E-5A18579C5207}
-C-<Site>-Desktops                                       {2406E8A5-02E6-4F62-8D3A-575EFCFE37A8}
-C-Web-Baseline                                          {C4A8CFC2-21EC-408E-B8B3-E5F3F6D7DBD1}
-C-DomainControllers-Baseline                            {1CB8C9E9-8035-49CB-BDAD-2070C646CAE1}
-Default Domain Policy                                   {866736C0-C9A9-4631-90A0-9B98C7B086B8}
-U-Admin-Baseline                                        {D6C1E22C-69BD-407B-AED1-E99AE309CE40}
-C-Remote Desktop-Baseline                               {478E36A0-0D18-417C-90A6-01E9FC340243}
-C-PawT0-Baseline                                        {088AA3A3-6CE7-407F-8487-23C5B3CDF382}
-U-ItAdmin-Baseline                                      {1D0C20AB-6EFF-49D5-A065-76BE927B2BF5}
-C-Servers-Baseline                                      {79382470-AEA9-43AC-A494-CA2633BA1FA9}
-C-Baseline                                              {55924CA0-653E-4F6F-9842-8A298BB974C2}
-U-<Site>-Users                                          {23EAE781-7964-4EC2-811F-9DA51A11CF40}
-Set PDCe Domain Controller as Authoritative Time Server {D66FA2E1-805E-40E4-B7C7-4FC191A6E188}
-C-Hyper-V-Baseline                                      {85B17C59-5E7A-4474-BF76-6DBEF710F8DA}
-
+Name                           Value
+----                           -----
+C-Baseline                     {4FC18909-1182-4EA3-B1B5-1DE5610DCC9A}
+C-DomainControllers-Baseline   {8CDEA79E-BA18-44A6-9D12-A467AF8BF680}
+C-Infra-Baseline               {03BFC58A-7E1E-415D-9D17-990362FA7DFC}
+C-InfraStaging-Baseline        {29B65987-9A81-4BBA-9196-4ED4F204DAEC}
+C-InfraT0-Baseline             {4CC02AB3-AF49-45D5-B779-494D4D2E544B}
+C-ItAdmin-Baseline             {849C9D55-967E-42AD-8519-06D94A5C8D68}
+C-PAW-Baseline                 {7DFB26B1-5358-4637-A5DD-F1E2AB0CD6C8}
+C-PawStaging-Baseline          {FF1E85C7-C236-44BA-B715-15F207B0BF73}
+C-PawT0-Baseline               {A4E1010F-CC21-438A-875E-7050FC6514B7}
+C-Servers-Baseline             {6811B64A-5287-4B9C-8998-302CE68DCB73}
+C-Sites-Baseline               {B96355B5-3392-4B4E-90F2-A6A7134544AE}
+Default Domain Controllers Po… {C6A0C480-D6FB-4999-BE97-22BBFBA5446C}
+Default Domain Policy          {59BCB026-F61F-4715-8C8B-3AF97057EB00}
+Install-SW-Test                {CCC5B0CD-0D42-429E-AAD3-AD1756E1C1BD}
+U-Baseline                     {B8958955-51E2-4D6E-AE9C-56E8AED94F37}
+U-ItAdmin-Baseline             {8C35B3AA-3732-488C-9114-600318479F13}
+U-Sites-Baseline               {67A95BEE-63F6-4F43-881D-8C5A644730E0}
+U-Users-Baseline               {7C3F1D6F-9F31-4B8E-850F-3A67F8BC5CA8}
 
 ---- MISSING ----
 {a1f3d411-282d-4d59-9026-8980e53c3f99} || Exchange Client Access
