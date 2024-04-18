@@ -266,7 +266,7 @@ If ($DcDisks) {
 
                         # Use wevutil to change the log path
                         Start-Process -Wait "$env:windir\System32\wevtutil.exe" -ArgumentList "sl `"$Item`" /lfn:`"E:\ApplicationAndServicesLogs\$EventLogFile.evtx`"" -NoNewWindow
-                    }
+                    } #end Foreach
                 }
             } #end Switch
         }
