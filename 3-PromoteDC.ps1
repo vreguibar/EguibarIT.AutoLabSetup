@@ -211,45 +211,62 @@ If ($DcDisks) {
                     New-Item -Path 'E:\ApplicationAndServicesLogs' -ItemType Directory
 
                     # replicate permissions
-                    $originalAcl = Get-Acl -Path "$env:SystemRoot\system32\winevt\Logs" -Audit
+                    $originalAcl = Get-Acl -Path "$env:SystemRoot\system32\winevt\Logs" -Audit -AllCentralAccessPolicies
 
                     Set-Acl -Path 'E:\WindowsLogs' -AclObject $originalAcl -ClearCentralAccessPolicy
-                    $targetAcl = Get-Acl -Path 'E:\WindowsLogs' -Audit
+                    $targetAcl = Get-Acl -Path 'E:\WindowsLogs' -Audit -AllCentralAccessPolicies
                     $targetAcl.SetOwner([System.Security.Principal.NTAccount]::new('SYSTEM'))
 
                     Set-Acl -Path 'E:\ApplicationAndServicesLogs' -AclObject $originalAcl -ClearCentralAccessPolicy
-                    $targetAcl = Get-Acl -Path 'E:\ApplicationAndServicesLogs' -Audit
+                    $targetAcl = Get-Acl -Path 'E:\ApplicationAndServicesLogs' -Audit -AllCentralAccessPolicies
                     $targetAcl.SetOwner([System.Security.Principal.NTAccount]::new('SYSTEM'))
 
-                    # Move log files to E drive
+                    # Registry hive for Logs
                     $regkeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\EventLog'
-                    <#
-                        $EvtLogFiles = @(
-                            'Active Directory Web Services',
-                            'Application',
-                            'DFS Replication',
-                            'Directory Service',
-                            'DNS Server',
-                            'HardwareEvents',
-                            'Internet Explorer',
-                            'Key Management Service',
-                            'Security',
-                            'System',
-                            'Windows PowerShell'
-                        )
-                        #>
 
-                    $EvtLogFiles = Get-ChildItem $regkeypath
+                    # Get the name of existing windows evtx from registry
+                    $EvtLogFiles = (Get-ChildItem $regkeypath).PsChildName
+
+                    # Get the other list of logs (Microsoft/Windows)
+                    [System.Collections.ArrayList]$ArrayList = wevtutil enum-logs
 
                     Foreach ($item in $EvtLogFiles) {
+                        $RegPath = ('{0}\{1}' -f $regkeypath, $item)
                         #Set-ItemProperty -Path ('{0}\{1}' -f $regkeyPath, $item) -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item)
-                        if (-not(Test-RegistryValue -Path $item.PSPath -Value 'File')) {
-                            New-ItemProperty -Path $item.PSPath -Name 'File' -PropertyType ExpandString
+                        if (-not(Test-RegistryValue -Path $RegPath -Value 'File')) {
+                            New-ItemProperty -Path $RegPath -Name 'File' -PropertyType ExpandString
                         }
-                        Set-ItemProperty -Path $item.PSPath -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item.PSChildName)
+                        New-ItemProperty -Path $RegPath -Name 'AutoBackupLogFiles' -Value '1' -PropertyType 'DWord' -force
+                        New-ItemProperty -Path $RegPath -Name 'Flags' -Value '1' -PropertyType 'DWord' -force
 
-                        Limit-EventLog -LogName $item.PSChildName -MaximumSize 4080MB -OverflowAction OverwriteAsNeeded
+                        Set-ItemProperty -Path $RegPath -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item) -force
+
+                        Limit-EventLog -LogName $item -MaximumSize 4080MB -OverflowAction OverwriteAsNeeded
+
+                        #remove Windows Logs (above) from the full list (Microsoft/Windows)
+                        [Void]$ArrayList.Remove($Item)
                     }#end Foreach
+
+                    [int]$i = 0
+
+                    # Move remaining EVTX files to E:\ApplicationAndServicesLogs
+                    Foreach ($Item in $ArrayList) {
+                        $i ++
+
+                        $parameters = @{
+                            Activity         = 'Moving a total of {0} EventLog files' -f $ArrayList.Count
+                            Status           = 'Moving file number {0}. ' -f $i
+                            PercentComplete  = ($i / $ArrayList.Count) * 100
+                            CurrentOperation = 'Processing file: {0}' -f $Item
+                        }
+                        Write-Progress @parameters
+
+                        # Some logs has a / in the event log filename, this is an illegal character and is therefore replaces with %4
+                        $EventLogFile = $Item -replace '/', "%4"
+
+                        # Use wevutil to change the log path
+                        Start-Process -Wait "$env:windir\System32\wevtutil.exe" -ArgumentList "sl `"$Item`" /lfn:`"E:\ApplicationAndServicesLogs\$EventLogFile.evtx`"" -NoNewWindow
+                    }
                 }
             } #end Switch
         }
