@@ -66,7 +66,7 @@ $ConfigJSON | Out-File -Force $ConfigPath
 $AllModules = @(
     'ActiveDirectory',
     'EguibarIT',
-    'EguibarIT.Delegation',
+    'EguibarIT.DelegationPS',
     'AdmPwd.PS',
     'ServerManager',
     'LAPS'
@@ -149,7 +149,7 @@ Set-ItemProperty -Path $regkeyPath -Name 'AutoLogonCount' -Value 1
 Try {
 
     # Look for old LAPS attribute
-    if ($null -eq $guidmap['ms-Mcs-AdmPwd']) {
+    if ($null -eq $Variables.guidmap['ms-Mcs-AdmPwd']) {
         Write-Verbose -Message 'LAPS is NOT supported on this environment. Proceeding to configure it by extending the Schema.'
 
 
@@ -183,7 +183,7 @@ Try {
             [System.Environment]::NewLine
 
             # Look for Windows LAPS attribute
-            If ($null -eq $guidmap['msLAPS-Password']) {
+            If ($null -eq $Variables.guidmap['msLAPS-Password']) {
 
                 Write-Verbose -Message 'Modifying Windows LAPS'
                 Update-LapsADSchema -Confirm:$false -Verbose

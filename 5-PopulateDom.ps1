@@ -73,8 +73,8 @@ $ConfigJSON | Out-File -Force $ConfigPath
 $AllModules = @(
     'ActiveDirectory',
     'EguibarIT',
-    'EguibarIT.Delegation',
-    'EguibarIT.Housekeeping',
+    'EguibarIT.DelegationPS',
+    'EguibarIT.HousekeepingPS',
     'GroupPolicy',
     'ServerManager'
 )
@@ -114,12 +114,12 @@ try {
 
 
 # Naming conventions hashtable
-$NC = @{'sl' = $confXML.n.NC.LocalDomainGroupPreffix;
-    'sg'     = $confXML.n.NC.GlobalGroupPreffix;
-    'su'     = $confXML.n.NC.UniversalGroupPreffix;
-    'Delim'  = $confXML.n.NC.Delimiter;
-    'T0'     = $confXML.n.NC.AdminAccSufix0;
-    'T1'     = $confXML.n.NC.AdminAccSufix1;
+$NC = @{'sl' = $confXML.n.NC.LocalDomainGroupPreffix
+    'sg'     = $confXML.n.NC.GlobalGroupPreffix
+    'su'     = $confXML.n.NC.UniversalGroupPreffix
+    'Delim'  = $confXML.n.NC.Delimiter
+    'T0'     = $confXML.n.NC.AdminAccSufix0
+    'T1'     = $confXML.n.NC.AdminAccSufix1
     'T2'     = $confXML.n.NC.AdminAccSufix2
 }
 

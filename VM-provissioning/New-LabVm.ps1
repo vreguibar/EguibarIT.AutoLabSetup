@@ -23,8 +23,9 @@ Param(
     [Parameter(Mandatory = $false, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
         HelpMessage = 'File containing the configuration data of the new VM (just in case VM name exists)',
         Position = 2)]
+    [PSDefaultValue(Help = 'Default Value is "C:\VMs\MainData.psd1"')]
     [string]
-    $DataFile
+    $DataFile = 'C:\VMs\MainData.psd1'
 
 )
 <#
@@ -32,7 +33,7 @@ Param(
    Create a MOD virtual machine
 .DESCRIPTION
    Create a MOD (modified) virtual machine by providing only 3 parameters.
-   This script is harcoded to use my laptop virtual environment; this must be changed to fit your own needs.
+   This script is hardcoded to use my laptop virtual environment; this must be changed to fit your own needs.
    All VMs go into C:\VMs
    Any created VM has a differential disk based on existing master disks
    Win 10, Win 11, Win 2019, Win 2019 Core, Win 2022, Win 2022 Core
@@ -72,14 +73,9 @@ If (-not $IsAdmin) {
 # Constants
 $VmFolder = 'C:\VMs'
 
-If (-not $PSBoundParameters['DataFile']) {
+# Verbose which data file is used.
+Write-Verbose -Message ('Using {0} Data file.' -f $PSBoundParameters['DataFile'])
 
-    Write-Verbose -Message 'Getting default location of Data file.'
-
-    $DataFile = 'C:\VMs\MainData.psd1'
-} else {
-    Write-Verbose -Message ('Using {0} Data file.' -f $PSBoundParameters['DataFile'])
-}
 
 ################################################################################
 # Variables
@@ -331,7 +327,7 @@ Set-VMFirmware -VMName $vmName -SecureBootTemplate 'MicrosoftWindows' -EnableSec
 $HGOwner = Get-HgsGuardian UntrustedGuardian
 $KeyProtector = New-HgsKeyProtector -Owner $HGOwner -AllowUntrustedRoot
 Set-VMKeyProtector -VMName $vmName -KeyProtector $KeyProtector.RawData
-Enable-VMTPM -VM $vmName
+Enable-VMTPM -VM $vm
 
 
 #Mount the newly created VHDX file

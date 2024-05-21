@@ -77,7 +77,7 @@ $Env:ADPS_LoadDefaultDrive = 0
 $AllModules = @(
     'ActiveDirectory',
     'EguibarIT',
-    'EguibarIT.Delegation',
+    'EguibarIT.DelegationPS',
     'GroupPolicy',
     'ServerManager',
     'DnsServer',

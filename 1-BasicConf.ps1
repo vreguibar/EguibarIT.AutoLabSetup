@@ -641,10 +641,78 @@ Install-PackageProvider -Name NuGet -Scope AllUsers -Force
 Register-PSRepository -Default -Verbose
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -Verbose
 
-#Find-Module -Name LAPS | Install-Module -Scope AllUsers -AllowClobber -Verbose
-Find-Module -Name EguibarIT | Install-Module -Scope AllUsers -AllowClobber -Verbose
-Find-Module -Name EguibarIT.Delegation | Install-Module -Scope AllUsers -AllowClobber -Verbose
-Find-Module -Name EguibarIT.Housekeeping | Install-Module -Scope AllUsers -AllowClobber -Verbose
+# Find and install EguibarIT module
+Find-Module -Name EguibarIT | Install-Module -Scope AllUsers -Verbose
+
+# Find and install EguibarIT.DelegationPS module (Try First DelegationPS and Delegation binary last)
+try {
+    Write-Verbose 'Checking if EguibarIT.DelegationPS is installed.'
+    $delegationPSInstalled = Get-Module -ListAvailable -Name 'EguibarIT.DelegationPS'
+
+    if ($delegationPSInstalled) {
+        Write-Verbose 'Importing EguibarIT.DelegationPS module.'
+        Import-Module -Name 'EguibarIT.DelegationPS' -Force -Verbose:$false -ErrorAction Stop
+    } else {
+        Write-Verbose 'EguibarIT.DelegationPS not found. Checking for EguibarIT.Delegation.'
+        $delegationInstalled = Get-Module -ListAvailable -Name 'EguibarIT.Delegation'
+
+        if ($delegationInstalled) {
+            Write-Verbose 'Importing EguibarIT.Delegation module.'
+            Import-Module -Name 'EguibarIT.Delegation' -Force -Verbose:$false -ErrorAction Stop
+        } else {
+            Write-Verbose 'Neither module found. Checking PowerShell Gallery for EguibarIT.DelegationPS.'
+            $galleryModule = Find-Module -Name 'EguibarIT.DelegationPS' -ErrorAction Stop
+
+            if ($galleryModule) {
+                Write-Verbose 'EguibarIT.DelegationPS found in PowerShell Gallery.'
+                Install-Module -Name 'EguibarIT.DelegationPS' -Scope AllUsers -Force -ErrorAction Stop
+                Write-Verbose 'EguibarIT.DelegationPS module installed successfully.'
+
+                Write-Verbose 'Importing EguibarIT.DelegationPS module.'
+                Import-Module -Name 'EguibarIT.DelegationPS' -Force -Verbose:$false -ErrorAction Stop
+            } else {
+                Write-Error 'EguibarIT.DelegationPS module not found in PowerShell Gallery.'
+            } #end if
+        } #end if
+    } #end if
+} catch {
+    Write-Error "An error occurred: $_"
+}
+
+# Find and install EguibarIT.HousekeepingPS module (Try First HousekeepingPS and Housekeeping binary last)
+try {
+    Write-Verbose 'Checking if EguibarIT.HousekeepingPS is installed.'
+    $housekeepingPSInstalled = Get-Module -ListAvailable -Name 'EguibarIT.HousekeepingPS'
+
+    if ($housekeepingPSInstalled) {
+        Write-Verbose 'Importing EguibarIT.HousekeepingPS module.'
+        Import-Module -Name 'EguibarIT.HousekeepingPS' -Force -Verbose:$false -ErrorAction Stop
+    } else {
+        Write-Verbose 'EguibarIT.HousekeepingPS not found. Checking for EguibarIT.Delegation.'
+        $housekeepingPSInstalled = Get-Module -ListAvailable -Name 'EguibarIT.Housekeeping'
+
+        if ($housekeepingPSInstalled) {
+            Write-Verbose 'Importing EguibarIT.Housekeeping module.'
+            Import-Module -Name 'EguibarIT.Housekeeping' -Force -Verbose:$false -ErrorAction Stop
+        } else {
+            Write-Verbose 'Neither module found. Checking PowerShell Gallery for EguibarIT.HousekeepingPS.'
+            $galleryModule = Find-Module -Name 'EguibarIT.HousekeepingPS' -ErrorAction Stop
+
+            if ($galleryModule) {
+                Write-Verbose 'EguibarIT.HousekeepingPS found in PowerShell Gallery.'
+                Install-Module -Name 'EguibarIT.HousekeepingPS' -Scope AllUsers -Force -ErrorAction Stop
+                Write-Verbose 'EguibarIT.HousekeepingPS module installed successfully.'
+
+                Write-Verbose 'Importing EguibarIT.HousekeepingPS module.'
+                Import-Module -Name 'EguibarIT.HousekeepingPS' -Force -Verbose:$false -ErrorAction Stop
+            } else {
+                Write-Error 'EguibarIT.HousekeepingPS module not found in PowerShell Gallery.'
+            } #end if
+        } #end if
+    } #end if
+} catch {
+    Write-Error "An error occurred: $_"
+}
 
 
 # Install PowerShell 7.x (latest)
