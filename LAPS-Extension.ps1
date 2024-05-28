@@ -1,5 +1,5 @@
 <#
-    .Script prupose
+    .Script purpose
 
     .NOTES
         Version:         1.0

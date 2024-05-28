@@ -182,7 +182,7 @@ $ScriptBlock = {
 
     $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\CMD.exe' -Argument '/c "Start SConfig && Start CMD"'
+    $TaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\CMD.exe' -Argument '/c "Start SConfig && Start CMD && Start PowerShell && Start pwsh.exe"' -WorkingDirectory $env:USERPROFILE
 
     $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn
 
@@ -279,7 +279,7 @@ If ($CurrentSession.State -ne 'Opened') {
 #### Copy-Item might throw an error (Exception setting "Attributes": "Cannot convert value "525344" to type "System.IO.FileAttributes")
 ### but will copy file. This is due file "flag" to sync with OneDrive.
 # Provide the path where local files are located
-$SourceFiles = 'C:\Users\RODRIGUEZEGUIBARVice\OneDrive - EguibarIT\_Scripts\LabSetup\SourceDC\EguibarIT.AutoLabSetup'
+$SourceFiles = 'C:\Users\RODRIGUEZEGUIBARVice\OneDrive - Vicente Rodriguez Eguibar\_Scripts\LabSetup\SourceDC\Modules\EguibarIT.AutoLabSetup'
 
 
 #To $Scripts directory
@@ -309,7 +309,7 @@ try {
     Copy-Item @Splat -Path $SourceFiles\Pic -Recurse
 
     #Provide the path where files are
-    $SourceFiles = 'C:\Users\RODRIGUEZEGUIBARVice\OneDrive - EguibarIT\_Scripts\LabSetup\SW'
+    $SourceFiles = 'C:\Users\RODRIGUEZEGUIBARVice\OneDrive - Vicente Rodriguez Eguibar\_Scripts\LabSetup\SW'
 
     # Copy Lab.bgi and IPv6.ps1 files
     Copy-Item -ToSession $s -Path $SourceFiles\BGInfo\Lab.bgi -Destination 'C:\PsScripts' -Force -ErrorAction SilentlyContinue -Verbose

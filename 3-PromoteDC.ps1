@@ -119,11 +119,21 @@ If ($DcDisks) {
                     If ($Disk.NumberOfPartitions -lt 1) {
                         # Create New Partition
                         New-Partition -DiskNumber $Disk.Number -UseMaximumSize -DriveLetter 'N'
+                    } else {
+                        # Check if partition exist
+                        $PartitionType = (Get-Partition -DiskNumber $Disk.Number -PartitionNumber 2).Type
+                        If ($PartitionType -eq 'Basic') {
+                            Write-Verbose -Message 'Partition already formatted.'
+                        } else {
+                            # Format partition
+                            Format-Volume -DriveLetter 'N' -FileSystem NTFS -NewFileSystemLabel 'NTDS' -Force
+                        } #end If-Else
+                    } #end If-Else
+
+                    #Check Folder exist. Create if not
+                    If (-Not (Test-Path 'N:\NTDS')) {
+                        New-Item -Path 'N:\NTDS' -ItemType Directory
                     } #end If
-
-                    Format-Volume -DriveLetter 'N' -FileSystem NTFS -NewFileSystemLabel 'NTDS' -Force
-
-                    New-Item -Path 'N:\NTDS' -ItemType Directory
                 }
 
                 2 {
@@ -132,10 +142,21 @@ If ($DcDisks) {
                     If ($Disk.NumberOfPartitions -lt 1) {
                         # Create New Partition
                         New-Partition -DiskNumber $Disk.Number -UseMaximumSize -DriveLetter 'L'
+                    } else {
+                        # Check if partition exist
+                        $PartitionType = (Get-Partition -DiskNumber $Disk.Number -PartitionNumber 2).Type
+                        If ($PartitionType -eq 'Basic') {
+                            Write-Verbose -Message 'Partition already formatted.'
+                        } else {
+                            # Format partition
+                            Format-Volume -DriveLetter 'L' -FileSystem NTFS -NewFileSystemLabel 'NTDS-Logs' -Force
+                        } #end If-Else
+                    } #end If-Else
 
-                    } #end If
-                    Format-Volume -DriveLetter 'L' -FileSystem NTFS -NewFileSystemLabel 'NTDS-Logs' -Force
-                    New-Item -Path 'L:\NTDS-LOGs' -ItemType Directory
+                    #Check Folder exist. Create if not
+                    If (-Not (Test-Path 'L:\NTDS-LOGs')) {
+                        New-Item -Path 'L:\NTDS-LOGs' -ItemType Directory
+                    }
                 }
 
                 3 {
@@ -145,9 +166,21 @@ If ($DcDisks) {
                         # Create New Partition
                         New-Partition -DiskNumber $Disk.Number -UseMaximumSize -DriveLetter 'S'
 
-                    } #end If
-                    Format-Volume -DriveLetter 'S' -FileSystem NTFS -NewFileSystemLabel 'SYSVOL' -Force
-                    New-Item -Path 'S:\SYSVOL' -ItemType Directory
+                    } else {
+                        # Check if partition exist
+                        $PartitionType = (Get-Partition -DiskNumber $Disk.Number -PartitionNumber 2).Type
+                        If ($PartitionType -eq 'Basic') {
+                            Write-Verbose -Message 'Partition already formatted.'
+                        } else {
+                            # Format partition
+                            Format-Volume -DriveLetter 'S' -FileSystem NTFS -NewFileSystemLabel 'SYSVOL' -Force
+                        } #end If-Else
+                    } #end If-Else
+
+                    #Check Folder exist. Create if not
+                    If (-Not (Test-Path 'S:\SYSVOL')) {
+                        New-Item -Path 'S:\SYSVOL' -ItemType Directory
+                    }
                 }
 
                 4 {
@@ -157,9 +190,21 @@ If ($DcDisks) {
                         # Create New Partition
                         New-Partition -DiskNumber $Disk.Number -UseMaximumSize -DriveLetter 'T'
 
-                    } #end If
-                    Format-Volume -DriveLetter 'T' -FileSystem NTFS -NewFileSystemLabel 'TEMP' -Force
-                    New-Item -Path 'T:\TEMP' -ItemType Directory
+                    } else {
+                        # Check if partition exist
+                        $PartitionType = (Get-Partition -DiskNumber $Disk.Number -PartitionNumber 2).Type
+                        If ($PartitionType -eq 'Basic') {
+                            Write-Verbose -Message 'Partition already formatted.'
+                        } else {
+                            # Format partition
+                            Format-Volume -DriveLetter 'T' -FileSystem NTFS -NewFileSystemLabel 'TEMP' -Force
+                        } #end If-Else
+                    } #end If-Else
+
+                    #Check Folder exist. Create if not
+                    If (-Not (Test-Path 'T:\TEMP')) {
+                        New-Item -Path 'T:\TEMP' -ItemType Directory
+                    }
                     $env:TEMP = 'T:\TEMP'
                     $env:TMP = 'T:\TEMP'
                 }
@@ -171,8 +216,17 @@ If ($DcDisks) {
                         # Create New Partition
                         New-Partition -DiskNumber $Disk.Number -UseMaximumSize -DriveLetter 'P'
 
-                    } #end If
-                    Format-Volume -DriveLetter 'P' -FileSystem NTFS -NewFileSystemLabel 'Pagefile' -Force
+                    } else {
+                        # Check if partition exist
+                        $PartitionType = (Get-Partition -DiskNumber $Disk.Number -PartitionNumber 2).Type
+                        If ($PartitionType -eq 'Basic') {
+                            Write-Verbose -Message 'Partition already formatted.'
+                        } else {
+                            # Format partition
+                            Format-Volume -DriveLetter 'P' -FileSystem NTFS -NewFileSystemLabel 'Pagefile' -Force
+                        } #end If-Else
+                    } #end If-Else
+
 
                     # Disable AutomaticManagedPagefile
                     $YourSys = (Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction SilentlyContinue)
@@ -204,69 +258,95 @@ If ($DcDisks) {
                         # Create New Partition
                         New-Partition -DiskNumber $Disk.Number -UseMaximumSize -DriveLetter 'E'
 
-                    } #end If
-                    Format-Volume -DriveLetter 'E' -FileSystem NTFS -NewFileSystemLabel 'EvtLog' -Force
+                    } else {
+                        # Check if partition exist
+                        $PartitionType = (Get-Partition -DiskNumber $Disk.Number -PartitionNumber 2).Type
+                        If ($PartitionType -eq 'Basic') {
+                            Write-Verbose -Message 'Partition already formatted.'
 
-                    New-Item -Path 'E:\WindowsLogs' -ItemType Directory
-                    New-Item -Path 'E:\ApplicationAndServicesLogs' -ItemType Directory
+                            # Flag to move the logs
+                            $MoveLogs = $false
+                        } else {
+                            # Format partition
+                            Format-Volume -DriveLetter 'E' -FileSystem NTFS -NewFileSystemLabel 'EvtLog' -Force
+
+                            # Flag to move the logs
+                            $MoveLogs = $true
+                        } #end If-Else
+                    } #end If-Else
 
                     # replicate permissions
                     $originalAcl = Get-Acl -Path "$env:SystemRoot\system32\winevt\Logs" -Audit -AllCentralAccessPolicies
 
-                    Set-Acl -Path 'E:\WindowsLogs' -AclObject $originalAcl -ClearCentralAccessPolicy
-                    $targetAcl = Get-Acl -Path 'E:\WindowsLogs' -Audit -AllCentralAccessPolicies
-                    $targetAcl.SetOwner([System.Security.Principal.NTAccount]::new('SYSTEM'))
+                    #Check Folder exist. Create if not
+                    If (-Not (Test-Path 'E:\WindowsLogs')) {
+                        New-Item -Path 'E:\WindowsLogs' -ItemType Directory
 
-                    Set-Acl -Path 'E:\ApplicationAndServicesLogs' -AclObject $originalAcl -ClearCentralAccessPolicy
-                    $targetAcl = Get-Acl -Path 'E:\ApplicationAndServicesLogs' -Audit -AllCentralAccessPolicies
-                    $targetAcl.SetOwner([System.Security.Principal.NTAccount]::new('SYSTEM'))
+                        Set-Acl -Path 'E:\WindowsLogs' -AclObject $originalAcl -ClearCentralAccessPolicy
+                        $targetAcl = Get-Acl -Path 'E:\WindowsLogs' -Audit -AllCentralAccessPolicies
+                        $targetAcl.SetOwner([System.Security.Principal.NTAccount]::new('SYSTEM'))
+                    }
 
-                    # Registry hive for Logs
-                    $regkeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\EventLog'
+                    #Check Folder exist. Create if not
+                    If (-Not (Test-Path 'E:\ApplicationAndServicesLogs')) {
+                        New-Item -Path 'E:\ApplicationAndServicesLogs' -ItemType Directory
 
-                    # Get the name of existing windows evtx from registry
-                    $EvtLogFiles = (Get-ChildItem $regkeypath).PsChildName
+                        Set-Acl -Path 'E:\ApplicationAndServicesLogs' -AclObject $originalAcl -ClearCentralAccessPolicy
+                        $targetAcl = Get-Acl -Path 'E:\ApplicationAndServicesLogs' -Audit -AllCentralAccessPolicies
+                        $targetAcl.SetOwner([System.Security.Principal.NTAccount]::new('SYSTEM'))
+                    }
 
-                    # Get the other list of logs (Microsoft/Windows)
-                    [System.Collections.ArrayList]$ArrayList = wevtutil enum-logs
+                    # Should logs be moved (New Partition)?
+                    If ($MoveLogs) {
 
-                    Foreach ($item in $EvtLogFiles) {
-                        $RegPath = ('{0}\{1}' -f $regkeypath, $item)
-                        #Set-ItemProperty -Path ('{0}\{1}' -f $regkeyPath, $item) -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item)
-                        if (-not(Test-RegistryValue -Path $RegPath -Value 'File')) {
-                            New-ItemProperty -Path $RegPath -Name 'File' -PropertyType ExpandString
-                        }
-                        New-ItemProperty -Path $RegPath -Name 'AutoBackupLogFiles' -Value '1' -PropertyType 'DWord' -force
-                        New-ItemProperty -Path $RegPath -Name 'Flags' -Value '1' -PropertyType 'DWord' -force
+                        # Registry hive for Logs
+                        $regkeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\EventLog'
 
-                        Set-ItemProperty -Path $RegPath -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item) -force
+                        # Get the name of existing windows evtx from registry
+                        $EvtLogFiles = (Get-ChildItem $regkeypath).PsChildName
 
-                        Limit-EventLog -LogName $item -MaximumSize 4080MB -OverflowAction OverwriteAsNeeded
+                        # Get the other list of logs (Microsoft/Windows)
+                        [System.Collections.ArrayList]$ArrayList = wevtutil enum-logs
 
-                        #remove Windows Logs (above) from the full list (Microsoft/Windows)
-                        [Void]$ArrayList.Remove($Item)
-                    }#end Foreach
+                        Foreach ($item in $EvtLogFiles) {
+                            $RegPath = ('{0}\{1}' -f $regkeypath, $item)
+                            #Set-ItemProperty -Path ('{0}\{1}' -f $regkeyPath, $item) -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item)
+                            if (-not(Test-RegistryValue -Path $RegPath -Value 'File')) {
+                                New-ItemProperty -Path $RegPath -Name 'File' -PropertyType ExpandString
+                            }
+                            New-ItemProperty -Path $RegPath -Name 'AutoBackupLogFiles' -Value '1' -PropertyType 'DWord' -Force
+                            New-ItemProperty -Path $RegPath -Name 'Flags' -Value '1' -PropertyType 'DWord' -Force
 
-                    [int]$i = 0
+                            Set-ItemProperty -Path $RegPath -Name 'File' -Value ('E:\WindowsLogs\{0}.evtx' -f $item) -Force
 
-                    # Move remaining EVTX files to E:\ApplicationAndServicesLogs
-                    Foreach ($Item in $ArrayList) {
-                        $i ++
+                            Limit-EventLog -LogName $item -MaximumSize 4080MB -OverflowAction OverwriteAsNeeded
 
-                        $parameters = @{
-                            Activity         = 'Moving a total of {0} EventLog files' -f $ArrayList.Count
-                            Status           = 'Moving file number {0}. ' -f $i
-                            PercentComplete  = ($i / $ArrayList.Count) * 100
-                            CurrentOperation = 'Processing file: {0}' -f $Item
-                        }
-                        Write-Progress @parameters
+                            #remove Windows Logs (above) from the full list (Microsoft/Windows)
+                            [Void]$ArrayList.Remove($Item)
+                        }#end Foreach
 
-                        # Some logs has a / in the event log filename, this is an illegal character and is therefore replaces with %4
-                        $EventLogFile = $Item -replace '/', "%4"
+                        [int]$i = 0
 
-                        # Use wevutil to change the log path
-                        Start-Process -Wait "$env:windir\System32\wevtutil.exe" -ArgumentList "sl `"$Item`" /lfn:`"E:\ApplicationAndServicesLogs\$EventLogFile.evtx`"" -NoNewWindow
-                    } #end Foreach
+                        # Move remaining EVTX files to E:\ApplicationAndServicesLogs
+                        Foreach ($Item in $ArrayList) {
+                            $i ++
+
+                            $parameters = @{
+                                Activity         = 'Moving a total of {0} EventLog files' -f $ArrayList.Count
+                                Status           = 'Moving file number {0}. ' -f $i
+                                PercentComplete  = ($i / $ArrayList.Count) * 100
+                                CurrentOperation = 'Processing file: {0}' -f $Item
+                            }
+                            Write-Progress @parameters
+
+                            # Some logs has a / in the event log filename, this is an illegal character and is therefore replaces with %4
+                            $EventLogFile = $Item -replace '/', '%4'
+
+                            # Use wevutil to change the log path
+                            Start-Process -Wait "$env:windir\System32\wevtutil.exe" -ArgumentList "sl `"$Item`" /lfn:`"E:\ApplicationAndServicesLogs\$EventLogFile.evtx`"" -NoNewWindow
+                        } #end Foreach
+
+                    } #end If
                 }
             } #end Switch
         }
