@@ -86,14 +86,38 @@ $AllModules = @(
 )
 foreach ($item in $AllModules) {
     Write-Verbose -Message ('Importing module {0}' -f $Item)
-    $Splat = @{
-        name    = $item
-        Force   = $true
-        verbose = $false
-    }
-    Import-Module @Splat
 
-}
+    try {
+        # Check if the module is already imported
+        $module = Get-Module -Name $item -ListAvailable -ErrorAction SilentlyContinue
+
+        if ($null -eq $module) {
+            Write-Error -Message ('Module {0} is not installed. Please install the module before importing.' -f $item)
+        } else {
+            # Import the module if it's not already imported
+            if (-not (Get-Module -Name $item -ErrorAction SilentlyContinue)) {
+                $Splat = @{
+                    ModuleInfo  = $module
+                    ErrorAction = 'Stop'
+                    Verbose     = $Verbose
+                }
+
+                if ($Force) {
+                    $Splat.Add('Force', $true)
+                }
+
+                Import-Module @Splat
+                Write-Verbose -Message ('Successfully imported module {0}' -f $item)
+            } else {
+                Write-Verbose -Message ('Module {0} is already imported.' -f $item)
+            }
+        }
+    } catch {
+        Write-Error -Message ('Failed to import module {0}. Error: {1}' -f $item, $_)
+        Throw
+    } #end Try-Catch
+} #end ForEach
+
 [System.Environment]::NewLine
 
 
@@ -242,13 +266,14 @@ If ($AdminName.SamAccountName -ne $confXML.n.Admin.users.Admin.Name) {
 
 
 # rename harlequin (Local guest account) to TheUgly. If not found look for Guest
-Try {
-    $Guest = Get-ADUser -Identity 'harlequin' -ea SilentlyContinue
-} Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-    $Guest = Get-ADUser -Identity 'Guest' -ea SilentlyContinue
-}
+$Guest = get-aduser -Filter * | Where-Object { $_.SID -like 'S-1-5-21-*-501' }
 If ($Guest) {
-    Set-ADUser -Identity $Guest -SamAccountName $confXML.N.Admin.Users.Guest.Name -DisplayName $confXML.N.Admin.Users.Guest.Name
+    $Splat = @{
+        Identity       = $Guest
+        SamAccountName = $confXML.N.Admin.Users.Guest.Name
+        DisplayName    = $confXML.N.Admin.Users.Guest.Name
+    }
+    Set-ADUser @Splat
 }
 
 
