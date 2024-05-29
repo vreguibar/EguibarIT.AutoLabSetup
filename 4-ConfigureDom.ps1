@@ -73,13 +73,13 @@ $ConfigJSON | Out-File -Force $ConfigPath
 # https://learn.microsoft.com/en-us/archive/blogs/adpowershell/disable-loading-the-default-drive-ad-during-import-module
 $Env:ADPS_LoadDefaultDrive = 0
 
+Import-Moddule -Name ServerManager -Force -Verbose:$false
+Import-Moddule -Name GroupPolicy -Force -Verbose:$false
 
 $AllModules = @(
     'ActiveDirectory',
     'EguibarIT',
     'EguibarIT.DelegationPS',
-    'GroupPolicy',
-    'ServerManager',
     'DnsServer',
     'SmbShare',
     'SmbWitness'
@@ -113,8 +113,23 @@ foreach ($item in $AllModules) {
             }
         }
     } catch {
-        Write-Error -Message ('Failed to import module {0}. Error: {1}' -f $item, $_)
-        Throw
+        # Special handling for ServerManager module
+        if ($item -eq 'ServerManager') {
+            Write-Verbose -Message 'Attempting to import ServerManager module interactively'
+            Start-Process powershell -ArgumentList '-Command Import-Module ServerManager' -Wait -NoNewWindow
+        } else {
+            Write-Error -Message ('Failed to import module {0}. Error: {1}' -f $item, $_)
+            Throw
+        }
+
+        # Special handling for GroupPolicy module
+        if ($item -eq 'GroupPolicy') {
+            Write-Verbose -Message 'Attempting to import GroupPolicy module interactively'
+            Start-Process powershell -ArgumentList '-Command Import-Module GroupPolicy' -Wait -NoNewWindow
+        } else {
+            Write-Error -Message ('Failed to import module {0}. Error: {1}' -f $item, $_)
+            Throw
+        }
     } #end Try-Catch
 } #end ForEach
 
