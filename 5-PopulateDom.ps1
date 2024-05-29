@@ -1,4 +1,4 @@
-<#
+﻿<#
     .Script prupose
         Populate domain
             Create Sites

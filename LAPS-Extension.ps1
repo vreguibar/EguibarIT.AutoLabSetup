@@ -105,8 +105,10 @@ try {
 } #end try-catch-finally
 
 
-$guidmap = [hashtable]::New()
-$guidmap = Get-AttributeSchemaHashTable
+
+If( -Not (Test-Path Variable.Variables)) {
+    Get-AttributeSchemaHashTable
+}
 
 ###############################################################################
 # START Set Autologon
@@ -214,7 +216,7 @@ Try {
 
         $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-        $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
+        $TaskAction = New-ScheduledTaskAction -Execute 'C:\Program Files\PowerShell\7\pwsh.exe' -Argument $Arguments
 
         $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 

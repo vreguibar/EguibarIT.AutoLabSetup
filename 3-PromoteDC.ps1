@@ -1,4 +1,4 @@
-<#
+﻿<#
     .Script prupose
         Promote this server to Domain Controller
     .NOTES
@@ -500,7 +500,7 @@ if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {
     $NextFile = '{0}\{1}' -f $DMscripts, $file
     $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
+    $TaskAction = New-ScheduledTaskAction -Execute 'C:\Program Files\PowerShell\7\pwsh.exe' -Argument $Arguments
 
     $Splat = @{
         Action      = $TaskAction
@@ -526,7 +526,7 @@ if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {
     $NextFile = '{0}\{1}' -f $DMscripts, $file
     $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
+    $TaskAction = New-ScheduledTaskAction -Execute 'C:\Program Files\PowerShell\7\pwsh.exe' -Argument $Arguments
 
     $Splat = @{
         Action      = $TaskAction

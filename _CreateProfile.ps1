@@ -1,4 +1,4 @@
-<#
+﻿<#
     .Script prupose
         Copy requested files and prepare the computer for automated process
     .NOTES
@@ -225,7 +225,7 @@ $ScriptBlock = {
 
     $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
+    $TaskAction = New-ScheduledTaskAction -Execute 'C:\Program Files\PowerShell\7\pwsh.exe' -Argument $Arguments
 
     $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 

@@ -1,4 +1,4 @@
-<#
+﻿<#
     .Script prupose
         Add features to this windows instance
         Configure DNS on this instance
@@ -253,7 +253,7 @@ $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
 $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest
 
-$TaskAction = New-ScheduledTaskAction -Execute 'PowerShell' -Argument $Arguments
+$TaskAction = New-ScheduledTaskAction -Execute 'C:\Program Files\PowerShell\7\pwsh.exe' -Argument $Arguments
 
 $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn -User $UserID
 
