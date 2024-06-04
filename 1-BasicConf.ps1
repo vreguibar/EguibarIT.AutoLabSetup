@@ -700,7 +700,7 @@ try {
 
             if ($galleryModule) {
                 Write-Verbose 'EguibarIT.HousekeepingPS found in PowerShell Gallery.'
-                Install-Module -Name 'EguibarIT.HousekeepingPS' -Scope AllUsers -Force -ErrorAction Stop
+                Install-Module -Name 'EguibarIT.HousekeepingPS' -AllowClobber -Scope AllUsers -Force -ErrorAction Stop
                 Write-Verbose 'EguibarIT.HousekeepingPS module installed successfully.'
 
                 Write-Verbose 'Importing EguibarIT.HousekeepingPS module.'

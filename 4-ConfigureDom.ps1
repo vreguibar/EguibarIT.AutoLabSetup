@@ -73,8 +73,8 @@ $ConfigJSON | Out-File -Force $ConfigPath
 # https://learn.microsoft.com/en-us/archive/blogs/adpowershell/disable-loading-the-default-drive-ad-during-import-module
 #$Env:ADPS_LoadDefaultDrive = 0
 
-Import-Moddule -Name ServerManager -Force -Verbose:$false
-Import-Moddule -Name GroupPolicy -Force -Verbose:$false
+Import-Module -Name ServerManager -Force -Verbose:$false
+Import-Module -Name GroupPolicy -Force -Verbose:$false
 
 $AllModules = @(
     'ActiveDirectory',
@@ -99,7 +99,7 @@ foreach ($item in $AllModules) {
                 $Splat = @{
                     ModuleInfo  = $module
                     ErrorAction = 'Stop'
-                    Verbose     = $Verbose
+                    Verbose     = $false
                 }
 
                 if ($Force) {
@@ -113,30 +113,14 @@ foreach ($item in $AllModules) {
             }
         }
     } catch {
-        # Special handling for ServerManager module
-        if ($item -eq 'ServerManager') {
-            Write-Verbose -Message 'Attempting to import ServerManager module interactively'
-            Start-Process powershell -ArgumentList '-Command Import-Module ServerManager' -Wait -NoNewWindow
-        } else {
-            Write-Error -Message ('Failed to import module {0}. Error: {1}' -f $item, $_)
-            Throw
-        }
-
-        # Special handling for GroupPolicy module
-        if ($item -eq 'GroupPolicy') {
-            Write-Verbose -Message 'Attempting to import GroupPolicy module interactively'
-            Start-Process powershell -ArgumentList '-Command Import-Module GroupPolicy' -Wait -NoNewWindow
-        } else {
-            Write-Error -Message ('Failed to import module {0}. Error: {1}' -f $item, $_)
-            Throw
-        }
+        throw
     } #end Try-Catch
 } #end ForEach
 
 [System.Environment]::NewLine
 
 
-#Get the OS Instalation Type
+#Get the OS Installation Type
 #$OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
 
 # Read Config.xml file. The file should be located on the same directory as this script
@@ -668,7 +652,7 @@ $Splat = @{
     Verbose     = $true
 }
 try {
-    Register-ScheduledTask @Splat
+    #Register-ScheduledTask @Splat
 } catch {
     throw
 } finally {

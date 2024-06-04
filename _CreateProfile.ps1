@@ -515,6 +515,6 @@ Invoke-Command -Session $s -ScriptBlock {
     } #end If
 
     Write-Host 'Reboot???'
-    Restart-Computer -Force
+    #Restart-Computer -Force
 
 } #end Invoke-Command

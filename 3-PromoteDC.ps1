@@ -1,5 +1,5 @@
 ﻿<#
-    .Script prupose
+    .Script purpose
         Promote this server to Domain Controller
     .NOTES
         Version:         1.0
@@ -438,7 +438,7 @@ Set-ItemProperty -Path $regkeyPath -Name 'AutoAdminLogon' -Value 1
 # Set the User Name
 #
 # We need to logon back with default Administrator. The NewAdmin (TheUgly)
-# needs to be addedd to the "Domain Admins" group.
+# needs to be added to the "Domain Admins" group.
 if (-not(Test-RegistryValue -Path $regkeypath -Value 'DefaultUserName')) {
     New-ItemProperty -Path $regkeypath -Name 'DefaultUserName' -PropertyType String
 }
@@ -513,7 +513,7 @@ if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {
         Verbose     = $true
     }
     try {
-        Register-ScheduledTask @Splat
+        #Register-ScheduledTask @Splat
     } catch {
         Throw
     }
@@ -539,7 +539,7 @@ if ($confXML.N.Domains.Prod.CreateLAPS -eq 'True') {
         Verbose     = $true
     }
     try {
-        Register-ScheduledTask @Splat
+        #Register-ScheduledTask @Splat
     } catch {
         throw
     }
