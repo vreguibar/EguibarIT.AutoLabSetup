@@ -1,5 +1,5 @@
 ﻿<#
-    .Script prupose
+    .Script purpose
         Configure the new domain
             BGInfo
             DNS
@@ -121,7 +121,7 @@ foreach ($item in $AllModules) {
 
 
 #Get the OS Installation Type
-#$OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
+#$OsInstallationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
 
 # Read Config.xml file. The file should be located on the same directory as this script
 try {
@@ -202,7 +202,7 @@ Unblock-File -Path ('{0}\{1}\scripts\Set-AdPicture.ps1' -f $SysVol, $env:USERDNS
 ###############################################################################
 # Change DNS zones
 ###############################################################################
-Write-Verbose -Message 'Set aging & Scavenning, convert reverse lookup zones to ADintegrated and Dynamic Secure Update'
+Write-Verbose -Message 'Set aging & Scavenging, convert reverse lookup zones to ADintegrated and Dynamic Secure Update'
 
 #Convert reverse lookup zones to ADintegrated and Dynamic Secure Update
 ConvertTo-DnsServerPrimaryZone -Name $confXML.N.IP.IPv4ReverseZone -PassThru -Verbose -ReplicationScope Forest -Force
@@ -288,7 +288,7 @@ $Splat = @{
 
 # Check if Exchange needs to be created
 if ($confXML.N.Domains.Prod.CreateExContainers -eq $True) {
-    $Splat.add('CreateExchange', $true)
+    $Splat.add('CreateExchange', $false)
 }
 
 # Check if DFS needs to be created
@@ -298,7 +298,7 @@ if ($confXML.N.Domains.Prod.CreateDFS -eq $True) {
 
 # Check if CA needs to be created
 if ($confXML.N.Domains.Prod.CreateCa -eq $True) {
-    $Splat.add('CreateCa', $true)
+    $Splat.add('CreateCa', $false)
 }
 
 # Check if LAPS needs to be created
@@ -392,21 +392,21 @@ Set-GPPrefRegistryValue -Name 'C-Set TIME parameters for Virtual Machine DC' -Co
 
 # Create 3 more sites apart from 'Default-First-Site-Name'
 New-ADReplicationSite -Name 'Second-Site' -Description 'Research & Development Facilities' -ProtectedFromAccidentalDeletion $true
-New-ADReplicationSite -Name 'Third-Site' -Description 'Asian Business Precense' -ProtectedFromAccidentalDeletion $true
+New-ADReplicationSite -Name 'Third-Site' -Description 'Asian Business Presence' -ProtectedFromAccidentalDeletion $true
 New-ADReplicationSite -Name 'Fourth-Site' -Description 'Manufacturing Facilities' -ProtectedFromAccidentalDeletion $true
 
 # IPv4 Subnets. Class C into 4 smaller
-New-ADReplicationSubnet -Name '192.168.0.0/26' -Site 'Third-Site' -Location 'Tokio,Japon'
+New-ADReplicationSubnet -Name '192.168.0.0/26' -Site 'Third-Site' -Location 'Tokio,Japan'
 New-ADReplicationSubnet -Name '192.168.0.64/26' -Site 'Second-Site' -Location 'Vancouver,Canada'
-New-ADReplicationSubnet -Name '192.168.0.128/26' -Site 'Fourth-Site' -Location 'Rostov,Rusia'
+New-ADReplicationSubnet -Name '192.168.0.128/26' -Site 'Fourth-Site' -Location 'Rostov,Russia'
 New-ADReplicationSubnet -Name '192.168.0.192/26' -Site 'Default-First-Site-Name' -Location 'Puebla,Mexico'
 
 # IPv6 Subnets. 4 smaller
 # <<<<<< Not working on w2k8 >>>>>>
 # https://www.internex.at/de/toolbox/ipv6
-New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18::/66' -Site 'Fourth-Site' -Location 'Rostov,Rusia'
+New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18::/66' -Site 'Fourth-Site' -Location 'Rostov,Russia'
 New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:4000::/66' -Site 'Second-Site' -Location 'Vancouver,Canada'
-New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:8000::/66' -Site 'Third-Site' -Location 'Tokio,Japon'
+New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:8000::/66' -Site 'Third-Site' -Location 'Tokio,Japan'
 New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:c000::/66' -Site 'Default-First-Site-Name' -Location 'Puebla,Mexico'
 
 #

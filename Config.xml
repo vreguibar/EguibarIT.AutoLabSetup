@@ -466,7 +466,7 @@
       </GPOs>
       <PSOs>
          <ItAdminsPSO>
-            <Name>ItAminsPSO</Name>
+            <Name>ItAdminsPSO</Name>
             <Precedence>500</Precedence>
             <ComplexityEnabled>$true</ComplexityEnabled>
             <Description>IT Administrators Accounts Password Policy</Description>
