@@ -276,7 +276,7 @@
          </ItHousekeepingOU>
          <ItPawOU>
             <Name>PAW</Name>
-            <description></description>
+            <description>Container for PAWs according to tier</description>
          </ItPawOU>
          <ItPawT0OU>
             <Name>PawT0</Name>
@@ -343,7 +343,7 @@
       <Users>
          <Admin>
             <Name>TheGood</Name>
-            <description></description>
+            <description>Default Built-In Administrator account</description>
             <department></department>
          </Admin>
          <NEWAdmin>
@@ -354,7 +354,7 @@
          </NEWAdmin>
          <Guest>
             <Name>TheBad</Name>
-            <description></description>
+            <description>Default Guest account</description>
             <department></department>
          </Guest>
       </Users>
@@ -466,7 +466,7 @@
       </GPOs>
       <PSOs>
          <ItAdminsPSO>
-            <Name>ItAdminsPSO</Name>
+            <Name>ItAminsPSO</Name>
             <Precedence>500</Precedence>
             <ComplexityEnabled>$true</ComplexityEnabled>
             <Description>IT Administrators Accounts Password Policy</Description>

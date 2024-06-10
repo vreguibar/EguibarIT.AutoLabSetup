@@ -106,7 +106,7 @@ try {
 
 
 
-If( -Not (Test-Path Variable.Variables)) {
+If ( -Not (Test-Path Variable:Variables)) {
     Get-AttributeSchemaHashTable
 }
 

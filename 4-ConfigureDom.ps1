@@ -120,8 +120,8 @@ foreach ($item in $AllModules) {
 [System.Environment]::NewLine
 
 
-#Get the OS Installation Type
-#$OsInstallationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
+#Get the OS Instalation Type
+#$OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
 
 # Read Config.xml file. The file should be located on the same directory as this script
 try {
@@ -234,7 +234,7 @@ Set-DnsServerZoneAging $confXML.N.IP.IPv4ReverseZone -Aging $True
 
 Set-DnsServerZoneAging $confXML.N.IP.IPv6ReverseZone -Aging $True
 
-set-DnsServerScavenging -ComputerName $Env:COMPUTERNAME -ApplyOnAllZones -ScavengingState $true -ScavengingInterval 7.00:00:00
+Set-DnsServerScavenging -ComputerName $Env:COMPUTERNAME -ApplyOnAllZones -ScavengingState $true -ScavengingInterval 7.00:00:00
 
 
 
@@ -257,7 +257,7 @@ Set-DnsServerForwarder -IPAddress $Splat
 
 
 # Get the Administrator by Well-Known SID and if not named as per the XML file, proceed to rename it
-$AdminName = get-aduser -Filter * | Where-Object { $_.SID -like 'S-1-5-21-*-500' }
+$AdminName = Get-ADUser -Filter * | Where-Object { $_.SID -like 'S-1-5-21-*-500' }
 If ($AdminName.SamAccountName -ne $confXML.n.Admin.users.Admin.Name) {
     Rename-ADObject -Identity $AdminName.DistinguishedName -NewName $confXML.n.Admin.users.Admin.Name
     Set-ADUser $AdminName -SamAccountName $confXML.n.Admin.users.Admin.Name -DisplayName $confXML.n.Admin.users.Admin.Name
@@ -265,7 +265,7 @@ If ($AdminName.SamAccountName -ne $confXML.n.Admin.users.Admin.Name) {
 
 
 # rename harlequin (Local guest account) to TheUgly. If not found look for Guest
-$Guest = get-aduser -Filter * | Where-Object { $_.SID -like 'S-1-5-21-*-501' }
+$Guest = Get-ADUser -Filter * | Where-Object { $_.SID -like 'S-1-5-21-*-501' }
 If ($Guest) {
     $Splat = @{
         Identity       = $Guest
@@ -288,7 +288,7 @@ $Splat = @{
 
 # Check if Exchange needs to be created
 if ($confXML.N.Domains.Prod.CreateExContainers -eq $True) {
-    $Splat.add('CreateExchange', $false)
+    $Splat.add('CreateExchange', $true)
 }
 
 # Check if DFS needs to be created
@@ -298,7 +298,7 @@ if ($confXML.N.Domains.Prod.CreateDFS -eq $True) {
 
 # Check if CA needs to be created
 if ($confXML.N.Domains.Prod.CreateCa -eq $True) {
-    $Splat.add('CreateCa', $false)
+    $Splat.add('CreateCa', $true)
 }
 
 # Check if LAPS needs to be created
@@ -392,21 +392,21 @@ Set-GPPrefRegistryValue -Name 'C-Set TIME parameters for Virtual Machine DC' -Co
 
 # Create 3 more sites apart from 'Default-First-Site-Name'
 New-ADReplicationSite -Name 'Second-Site' -Description 'Research & Development Facilities' -ProtectedFromAccidentalDeletion $true
-New-ADReplicationSite -Name 'Third-Site' -Description 'Asian Business Presence' -ProtectedFromAccidentalDeletion $true
+New-ADReplicationSite -Name 'Third-Site' -Description 'Asian Business Precense' -ProtectedFromAccidentalDeletion $true
 New-ADReplicationSite -Name 'Fourth-Site' -Description 'Manufacturing Facilities' -ProtectedFromAccidentalDeletion $true
 
 # IPv4 Subnets. Class C into 4 smaller
-New-ADReplicationSubnet -Name '192.168.0.0/26' -Site 'Third-Site' -Location 'Tokio,Japan'
+New-ADReplicationSubnet -Name '192.168.0.0/26' -Site 'Third-Site' -Location 'Tokio,Japon'
 New-ADReplicationSubnet -Name '192.168.0.64/26' -Site 'Second-Site' -Location 'Vancouver,Canada'
-New-ADReplicationSubnet -Name '192.168.0.128/26' -Site 'Fourth-Site' -Location 'Rostov,Russia'
+New-ADReplicationSubnet -Name '192.168.0.128/26' -Site 'Fourth-Site' -Location 'Rostov,Rusia'
 New-ADReplicationSubnet -Name '192.168.0.192/26' -Site 'Default-First-Site-Name' -Location 'Puebla,Mexico'
 
 # IPv6 Subnets. 4 smaller
 # <<<<<< Not working on w2k8 >>>>>>
 # https://www.internex.at/de/toolbox/ipv6
-New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18::/66' -Site 'Fourth-Site' -Location 'Rostov,Russia'
+New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18::/66' -Site 'Fourth-Site' -Location 'Rostov,Rusia'
 New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:4000::/66' -Site 'Second-Site' -Location 'Vancouver,Canada'
-New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:8000::/66' -Site 'Third-Site' -Location 'Tokio,Japan'
+New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:8000::/66' -Site 'Third-Site' -Location 'Tokio,Japon'
 New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:c000::/66' -Site 'Default-First-Site-Name' -Location 'Puebla,Mexico'
 
 #
@@ -552,7 +552,7 @@ Enable-ADOptionalFeature -Identity $RecycleBinCN -Scope ForestOrConfigurationSet
 # START Remove MachineAccountQuota
 ###############################################################################
 Write-Verbose -Message 'Removing permission for all users to add workstations to the domain"'
-Set-ADDomain -Identity ((Get-AdDomain).DistinguishedName) -Replace @{'ms-DS-MachineAccountQuota' = '0' }
+Set-ADDomain -Identity ((Get-ADDomain).DistinguishedName) -Replace @{'ms-DS-MachineAccountQuota' = '0' }
 ###############################################################################
 # END Remove MachineAccountQuota
 ###############################################################################
@@ -560,7 +560,7 @@ Set-ADDomain -Identity ((Get-AdDomain).DistinguishedName) -Replace @{'ms-DS-Mach
 Write-Verbose -Message 'Adding UPN suffixes for Domain...'
 ForEach ($upn in $confXML.N.Admin.UPNsufix.ChildNodes) {
     Try {
-        Get-AdForest | Set-ADForest -UPNSuffixes @{Add = $upn.'#text' }
+        Get-ADForest | Set-ADForest -UPNSuffixes @{Add = $upn.'#text' }
     } Catch {
         throw
     }
