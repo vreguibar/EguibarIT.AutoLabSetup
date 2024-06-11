@@ -1,5 +1,5 @@
 ﻿<#
-    .Script prupose
+    .Script purpose
         Populate domain
             Create Sites
             Create Users
@@ -70,13 +70,14 @@ $ConfigJSON = ConvertTo-Json -InputObject @{
 $ConfigJSON | Out-File -Force $ConfigPath
 #>
 
+Import-Module -Name ServerManager
+Import-Module -Name GroupPolicy
+
 $AllModules = @(
     'ActiveDirectory',
     'EguibarIT',
     'EguibarIT.DelegationPS',
-    'EguibarIT.HousekeepingPS',
-    'GroupPolicy',
-    'ServerManager'
+    'EguibarIT.HousekeepingPS'
 )
 foreach ($item in $AllModules) {
     Write-Verbose -Message ('Importing module {0}' -f $Item)
