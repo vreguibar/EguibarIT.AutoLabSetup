@@ -120,8 +120,8 @@ foreach ($item in $AllModules) {
 [System.Environment]::NewLine
 
 
-#Get the OS Instalation Type
-#$OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
+#Get the OS Installation Type
+#$OsInstallationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
 
 # Read Config.xml file. The file should be located on the same directory as this script
 try {
@@ -392,21 +392,21 @@ Set-GPPrefRegistryValue -Name 'C-Set TIME parameters for Virtual Machine DC' -Co
 
 # Create 3 more sites apart from 'Default-First-Site-Name'
 New-ADReplicationSite -Name 'Second-Site' -Description 'Research & Development Facilities' -ProtectedFromAccidentalDeletion $true
-New-ADReplicationSite -Name 'Third-Site' -Description 'Asian Business Precense' -ProtectedFromAccidentalDeletion $true
+New-ADReplicationSite -Name 'Third-Site' -Description 'Asian Business Presence' -ProtectedFromAccidentalDeletion $true
 New-ADReplicationSite -Name 'Fourth-Site' -Description 'Manufacturing Facilities' -ProtectedFromAccidentalDeletion $true
 
 # IPv4 Subnets. Class C into 4 smaller
-New-ADReplicationSubnet -Name '192.168.0.0/26' -Site 'Third-Site' -Location 'Tokio,Japon'
+New-ADReplicationSubnet -Name '192.168.0.0/26' -Site 'Third-Site' -Location 'Tokio,Japan'
 New-ADReplicationSubnet -Name '192.168.0.64/26' -Site 'Second-Site' -Location 'Vancouver,Canada'
-New-ADReplicationSubnet -Name '192.168.0.128/26' -Site 'Fourth-Site' -Location 'Rostov,Rusia'
+New-ADReplicationSubnet -Name '192.168.0.128/26' -Site 'Fourth-Site' -Location 'Rostov,Russia'
 New-ADReplicationSubnet -Name '192.168.0.192/26' -Site 'Default-First-Site-Name' -Location 'Puebla,Mexico'
 
 # IPv6 Subnets. 4 smaller
 # <<<<<< Not working on w2k8 >>>>>>
 # https://www.internex.at/de/toolbox/ipv6
-New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18::/66' -Site 'Fourth-Site' -Location 'Rostov,Rusia'
+New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18::/66' -Site 'Fourth-Site' -Location 'Rostov,Russia'
 New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:4000::/66' -Site 'Second-Site' -Location 'Vancouver,Canada'
-New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:8000::/66' -Site 'Third-Site' -Location 'Tokio,Japon'
+New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:8000::/66' -Site 'Third-Site' -Location 'Tokio,Japan'
 New-ADReplicationSubnet -Name 'fd36:46d4:a1a7:9d18:c000::/66' -Site 'Default-First-Site-Name' -Location 'Puebla,Mexico'
 
 #
