@@ -6,7 +6,7 @@
         DateModified:    31/May/2017
         LasModifiedBy:   Vicente Rodriguez Eguibar
             vicente@eguibar.com
-            Eguibar Information Technology S.L.
+            Eguibar IT
             http://www.eguibarit.com
     #>
 <#
