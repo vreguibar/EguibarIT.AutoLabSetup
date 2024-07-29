@@ -637,7 +637,8 @@ foreach ($svc in $DisabledServices) {
 
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-Install-PackageProvider -Name NuGet -Scope AllUsers -Force
+#Install-PackageProvider -Name NuGet -Scope AllUsers -Force
+Install-Module -Name PowerShellGet -Force
 Register-PSRepository -Default -Verbose
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -Verbose
 
@@ -665,7 +666,7 @@ try {
 
             if ($galleryModule) {
                 Write-Verbose 'EguibarIT.DelegationPS found in PowerShell Gallery.'
-                Install-Module -Name 'EguibarIT.DelegationPS' -Scope AllUsers -Force -ErrorAction Stop
+                Install-Module -Name 'EguibarIT.DelegationPS' -Scope AllUsers -AllowClobber -Force -ErrorAction Stop
                 Write-Verbose 'EguibarIT.DelegationPS module installed successfully.'
 
                 Write-Verbose 'Importing EguibarIT.DelegationPS module.'
@@ -704,7 +705,7 @@ try {
                 Write-Verbose 'EguibarIT.HousekeepingPS module installed successfully.'
 
                 Write-Verbose 'Importing EguibarIT.HousekeepingPS module.'
-                Import-Module -Name 'EguibarIT.HousekeepingPS' -Force -Verbose:$false -ErrorAction Stop
+                Import-Module -Name 'EguibarIT.HousekeepingPS'-Force -Verbose:$false -ErrorAction Stop
             } else {
                 Write-Error 'EguibarIT.HousekeepingPS module not found in PowerShell Gallery.'
             } #end if
