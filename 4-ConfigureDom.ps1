@@ -73,8 +73,8 @@ $ConfigJSON | Out-File -Force $ConfigPath
 # https://learn.microsoft.com/en-us/archive/blogs/adpowershell/disable-loading-the-default-drive-ad-during-import-module
 #$Env:ADPS_LoadDefaultDrive = 0
 
-Import-Module -Name ServerManager -Force -Verbose:$false
-Import-Module -Name GroupPolicy -Force -Verbose:$false
+Import-Module -Name ServerManager -Force -Verbose:$false | Out-Null
+Import-Module -Name GroupPolicy -Force -Verbose:$false | Out-Null
 
 $AllModules = @(
     'ActiveDirectory',
@@ -106,7 +106,7 @@ foreach ($item in $AllModules) {
                     $Splat.Add('Force', $true)
                 }
 
-                Import-Module @Splat
+                Import-Module @Splat | Out-Null
                 Write-Verbose -Message ('Successfully imported module {0}' -f $item)
             } else {
                 Write-Verbose -Message ('Module {0} is already imported.' -f $item)

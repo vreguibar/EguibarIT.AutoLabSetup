@@ -62,8 +62,8 @@ $ConfigJSON | Out-File -Force $ConfigPath
 #>
 
 Write-Verbose -Message 'Import the Module: EguibarIT & ServerManager'
-Import-Module -Name EguibarIT -Verbose:$false
-Import-Module -Name ServerManager -Verbose:$false
+Import-Module -Name EguibarIT -Verbose:$false | Out-Null
+Import-Module -Name ServerManager -Verbose:$false | Out-Null
 
 
 # Read Config.xml file. The file should be located on the same directory as this script
@@ -363,7 +363,7 @@ If ($DcDisks) {
 
 # Promote domain.
 
-Import-Module -Name ADDSDeployment -Force
+Import-Module -Name ADDSDeployment -Force | Out-Null
 
 # configure new forest
 $Splat = @{

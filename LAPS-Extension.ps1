@@ -78,7 +78,7 @@ foreach ($item in $AllModules) {
         Force   = $true
         Verbose = $false
     }
-    Import-Module @Splat
+    Import-Module @Splat | Out-Null
 
 }
 [System.Environment]::NewLine

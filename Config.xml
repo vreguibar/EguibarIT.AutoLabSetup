@@ -240,7 +240,7 @@
       <OUs>
          <ItAdminOU>
             <Name>Admin</Name>
-            <description>OU for IT Administration purposes, containing objects necessary for this
+            <description>OU for IT Administration purposes, containing objects necessary for theses
                tasks</description>
          </ItAdminOU>
          <ItAdminAccountsOU>

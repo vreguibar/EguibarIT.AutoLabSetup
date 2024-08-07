@@ -97,13 +97,21 @@ $ScriptBlock = {
     # Configure Display Resolution
     Set-DisplayResolution -Width 1920 -Height 1080 -Force
 
+    #Get the OS Instalation Type
+    $OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
+
     # Make Powershell default shell
     $regkeypath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-    if (-not(Get-ItemProperty -Path $regkeypath).Shell) {
-        New-ItemProperty -Path $regkeypath -Name 'Shell' -PropertyType String
-    }
-    #Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'CMD.exe /c "Start SConfig && Start CMD.exe && Start pwsh.exe"'
-    Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'pwsh.exe'
+    If ($OsInstalationType -ne 'Server Core') {
+
+        if (-not(Get-ItemProperty -Path $regkeypath).Shell) {
+            New-ItemProperty -Path $regkeypath -Name 'Shell' -PropertyType String
+        } #end If
+
+        #Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'CMD.exe /c "Start SConfig && Start CMD.exe && Start pwsh.exe"'
+        Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'pwsh.exe'
+
+    } #end If
 
     # Enable PowerShell Remoting
     #Enable-PSRemoting -SkipNetworkProfileCheck -Force

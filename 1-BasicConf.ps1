@@ -41,7 +41,7 @@ $VerbosePreference = 'Continue'
 #$ErrorActionPreference = 'Continue'
 
 Write-Verbose -Message 'Import the Module: ServerManager'
-Import-Module -Name ServerManager -Verbose:$false
+Import-Module -Name ServerManager -Verbose:$false | Out-Null
 
 
 

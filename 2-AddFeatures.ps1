@@ -28,8 +28,9 @@ Start-Sleep -Seconds 5
 $error.clear()
 
 Write-Verbose -Message 'Import the Module: EguibarIT & ServerManager'
-Import-Module -Name EguibarIT -Verbose:$false
-Import-Module -Name ServerManager -Verbose:$false
+Import-Module -Name EguibarIT -Verbose:$false | Out-Null
+Import-Module -Name ServerManager -Verbose:$false | Out-Null
+Import-Module -Name DnsServer -Verbose:$false | Out-Null
 
 # Get Folder where all Delegation Model scripts & files
 $DMscripts = ('{0}\PsScripts' -f $env:SystemDrive)
@@ -169,10 +170,6 @@ If ($OsInstalationType -ne 'Server Core') {
 ############################################################
 # START Add DNS zones
 ############################################################
-
-# Load DnsServer module - ONLY 2012 and higher
-
-Import-Module -Name DnsServer -Verbose:$false
 
 Write-Verbose -Message 'Add DNS reverse lookup zones'
 if (-not (([string]::IsNullOrEmpty($confXML.N.PCs.DC1.IPv4)) -or (([string]::IsNullOrEmpty($confXML.N.PCs.DC1.PrefixLengthIPv4))))) {

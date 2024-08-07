@@ -70,8 +70,8 @@ $ConfigJSON = ConvertTo-Json -InputObject @{
 $ConfigJSON | Out-File -Force $ConfigPath
 #>
 
-Import-Module -Name ServerManager
-Import-Module -Name GroupPolicy
+Import-Module -Name ServerManager -Verbose:$false | Out-Null
+Import-Module -Name GroupPolicy -Verbose:$false | Out-Null
 
 $AllModules = @(
     'ActiveDirectory',
@@ -86,7 +86,7 @@ foreach ($item in $AllModules) {
         Force   = $true
         Verbose = $false
     }
-    Import-Module @Splat
+    Import-Module @Splat | Out-Null
 
 }
 [System.Environment]::NewLine
