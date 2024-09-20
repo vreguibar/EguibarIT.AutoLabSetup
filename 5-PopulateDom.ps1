@@ -1143,7 +1143,7 @@ New-gMSAScheduledTask @Splat
 
 
 
- -Domain 'example.com' -LDAPPath 'OU=SpecialGroups,DC=example,DC=com'
+
 Write-Verbose -Message 'Set housekeeping for Tier2 Service Accounts & gMSA.'
 $ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier2ServiceAccount.name, $SvcAccPath
 $SAGroupName = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier2ServiceAccount.name

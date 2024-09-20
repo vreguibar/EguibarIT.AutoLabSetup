@@ -1,5 +1,5 @@
 ﻿<#
-    .Script prupose
+    .Script purpose
         Copy requested files and prepare the computer for automated process
     .NOTES
         Version:         1.0
@@ -97,12 +97,12 @@ $ScriptBlock = {
     # Configure Display Resolution
     Set-DisplayResolution -Width 1920 -Height 1080 -Force
 
-    #Get the OS Instalation Type
-    $OsInstalationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
+    #Get the OS Installation Type
+    $OsInstallationType = Get-ItemProperty -Path 'HKLM:Software\Microsoft\Windows NT\CurrentVersion' | Select-Object -ExpandProperty InstallationType
 
     # Make Powershell default shell
     $regkeypath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-    If ($OsInstalationType -ne 'Server Core') {
+    If ($OsInstallationType -ne 'Server Core') {
 
         if (-not(Get-ItemProperty -Path $regkeypath).Shell) {
             New-ItemProperty -Path $regkeypath -Name 'Shell' -PropertyType String
@@ -529,7 +529,7 @@ Invoke-Command -Session $s -ScriptBlock {
         } #end Foreach
     } #end If
 
-    Write-Host 'Reboot???'
+    Write-Output 'Reboot???'
     #Restart-Computer -Force
 
 } #end Invoke-Command
