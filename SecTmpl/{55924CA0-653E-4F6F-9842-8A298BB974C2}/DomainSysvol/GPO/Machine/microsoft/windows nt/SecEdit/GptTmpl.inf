@@ -1,0 +1,66 @@
+[Unicode]
+Unicode=yes
+
+[System Access]
+ForceLogoffWhenHourExpire = 1
+LSAAnonymousNameLookup = 0
+
+[System Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+
+[Security Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+
+[Application Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+
+[Event Audit]
+AuditSystemEvents = 3
+AuditLogonEvents = 3
+AuditObjectAccess = 3
+AuditPrivilegeUse = 3
+AuditPolicyChange = 3
+AuditAccountManage = 3
+AuditDSAccess = 3
+AuditAccountLogon = 3
+
+
+[Version]
+signature="$CHICAGO$"
+Revision=1
+
+[Privilege Rights]
+SeDenyInteractiveLogonRight=*S-1-5-32-546,*S-1-5-21-1603021367-609224540-1562392230-1620,*S-1-5-21-1603021367-609224540-1562392230-1621,*S-1-5-21-1603021367-609224540-1562392230-1622
+SeDenyRemoteInteractiveLogonRight=*S-1-5-32-546,*S-1-5-21-1603021367-609224540-1562392230-1620,*S-1-5-21-1603021367-609224540-1562392230-1621,*S-1-5-21-1603021367-609224540-1562392230-1622,*S-1-5-21-1603021367-609224540-1562392230-500,*S-1-5-21-1603021367-609224540-1562392230-1602
+SeDenyBatchLogonRight=*S-1-5-32-544,*S-1-5-32-548,*S-1-5-32-551,*S-1-5-32-550,*S-1-5-32-549,*S-1-5-32-546,*S-1-5-21-1603021367-609224540-1562392230-1624,*S-1-5-21-1603021367-609224540-1562392230-1625,*S-1-5-21-1603021367-609224540-1562392230-1626,*S-1-5-21-1603021367-609224540-1562392230-518,*S-1-5-21-1603021367-609224540-1562392230-519,*S-1-5-21-1603021367-609224540-1562392230-512,*S-1-5-21-1603021367-609224540-1562392230-500,*S-1-5-21-1603021367-609224540-1562392230-1602
+SeDenyServiceLogonRight=*S-1-5-32-544,*S-1-5-32-548,*S-1-5-32-551,*S-1-5-32-550,*S-1-5-32-549,*S-1-5-32-546,*S-1-5-21-1603021367-609224540-1562392230-1624,*S-1-5-21-1603021367-609224540-1562392230-1625,*S-1-5-21-1603021367-609224540-1562392230-1626,*S-1-5-21-1603021367-609224540-1562392230-518,*S-1-5-21-1603021367-609224540-1562392230-519,*S-1-5-21-1603021367-609224540-1562392230-512,*S-1-5-21-1603021367-609224540-1562392230-500,*S-1-5-21-1603021367-609224540-1562392230-1602
+SeNetworkLogonRight=*S-1-5-32-544,*S-1-5-11
+SeDenyNetworkLogonRight=*S-1-5-80-0,*S-1-5-7,*S-1-5-113,*S-1-5-114
+SeServiceLogonRight=*S-1-5-20,*S-1-5-80-0
+
+[Registry Keys]
+"MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AccountPicture\Users",2,"D:PAR(A;CI;KR;;;S-1-15-2-1)(A;CIIO;KA;;;CO)(A;CI;KA;;;SY)(A;CI;KA;;;BA)(A;CI;KA;;;BU)"
+
+[Registry Values]
+MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\PasswordExpiryWarning=4,7
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\LegalNoticeCaption=1,"Eguibar IT / Computer Legal Notice"
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\LegalNoticeText=7,Be advised that communications over and usage of the Eguibar Information Technology S.L. infrastructure and systems are continuously monitored. This includes phones internet"," e-mail and business applications. Such monitoring is needed to ensure the efficiency and availability of systems as well as to identify and prevent unauthorized use thereof.,Acceptance of this confirms that you have read"," understood and agree to be bound by the message above as well as the company E-mail and Internet Usage Policy and the company Security Policy. Copies of these documents are available from the HR Department.,Note that unauthorised or illegal use of Eguibar Information Technology S.L. computer systems and in particular unauthorised access to or copying of customer data may lead to disciplinary action and in severe cases to dismissal or prosecution.,This system is for use only by authorised users of Eguibar Information Technology S.L. and its associated businesses.
+MACHINE\System\CurrentControlSet\Control\Lsa\DisableDomainCreds=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\LmCompatibilityLevel=4,5
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\AuditReceivingNTLMTraffic=4,2
+MACHINE\System\CurrentControlSet\Control\Lsa\NoLMHash=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictAnonymous=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictAnonymousSAM=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy=4,1
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\EnableSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnablePlainTextPassword=4,0
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnableSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LDAP\LDAPClientIntegrity=4,2
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\AuditNTLMInDomain=4,7
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RequireStrongKey=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SealSecureChannel=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SignSecureChannel=4,1
+MACHINE\System\CurrentControlSet\Services\NTDS\Parameters\LDAPServerIntegrity=4,2

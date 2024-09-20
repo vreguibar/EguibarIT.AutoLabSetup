@@ -1,0 +1,76 @@
+[Version]
+signature="$CHICAGO$"
+Revision=1
+
+[Unicode]
+Unicode=yes
+
+[Privilege Rights]
+SeInteractiveLogonRight = *S-1-5-21-1603021367-609224540-1562392230-1610,*S-1-5-21-1603021367-609224540-1562392230-1624,*S-1-5-21-1603021367-609224540-1562392230-512,*S-1-5-32-544
+SeRemoteInteractiveLogonRight = *S-1-5-21-1603021367-609224540-1562392230-1610,*S-1-5-21-1603021367-609224540-1562392230-1624,*S-1-5-21-1603021367-609224540-1562392230-512
+SeBatchLogonRight = *S-1-5-21-1603021367-609224540-1562392230-1620
+SeServiceLogonRight = *S-1-5-21-1603021367-609224540-1562392230-1620
+SeDenyInteractiveLogonRight = *S-1-5-21-1603021367-609224540-1562392230-1626,*S-1-5-21-1603021367-609224540-1562392230-1625
+SeDenyRemoteInteractiveLogonRight = *S-1-5-21-1603021367-609224540-1562392230-1626,*S-1-5-21-1603021367-609224540-1562392230-1625
+[System Access]
+LSAAnonymousNameLookup = 0
+[Service General Setting]
+"BITS",2,""
+"BDESVC",2,""
+"Dnscache",2,""
+"Fax",4,""
+"BcastDVRUserService_eb17f",4,""
+"PhoneSvc",4,""
+"TapiSrv",4,""
+"icssvc",4,""
+"WinRM",2,""
+"W32Time",2,""
+"wuauserv",2,""
+"XboxGipSvc",4,""
+"XblAuthManager",4,""
+"XblGameSave",4,""
+"XboxNetApiSvc",4,""
+[Application Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+RestrictGuestAccess = 1
+[Security Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+RestrictGuestAccess = 1
+[System Log]
+MaximumLogSize = 4194240
+AuditLogRetentionPeriod = 0
+RestrictGuestAccess = 1
+[Registry Values]
+MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ScRemoveOption=1,"1"
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin=4,2
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser=4,0
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken=4,1
+MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\InactivityTimeoutSecs=4,900
+MACHINE\System\CurrentControlSet\Control\Lsa\DisableDomainCreds=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\LimitBlankPasswordUse=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\LmCompatibilityLevel=4,5
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\allownullsessionfallback=4,0
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\AuditReceivingNTLMTraffic=4,2
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinClientSec=4,537395200
+MACHINE\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinServerSec=4,537395200
+MACHINE\System\CurrentControlSet\Control\Lsa\NoLMHash=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictAnonymous=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictAnonymousSAM=4,1
+MACHINE\System\CurrentControlSet\Control\Lsa\RestrictRemoteSAM=1,"O:BAG:BAD:(A;;RC;;;BA)"
+MACHINE\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy=4,1
+MACHINE\System\CurrentControlSet\Control\Session Manager\ProtectionMode=4,1
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\RequireSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters\RestrictNullSessAccess=4,1
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnablePlainTextPassword=4,0
+MACHINE\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\RequireSecuritySignature=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\AuditNTLMInDomain=4,7
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RequireSignOrSeal=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\RequireStrongKey=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SealSecureChannel=4,1
+MACHINE\System\CurrentControlSet\Services\Netlogon\Parameters\SignSecureChannel=4,1

@@ -323,7 +323,14 @@ try {
     Copy-Item -ToSession $s -Path $SourceFiles\BGInfo\Lab.bgi -Destination 'C:\PsScripts' -Force -ErrorAction SilentlyContinue -Verbose
     Copy-Item -ToSession $s -Path $SourceFiles\BGInfo\IPv6.vbs -Destination 'C:\PsScripts' -Force -ErrorAction SilentlyContinue -Verbose
 
+    <#
+
+    Remove LEGACY LAPS
+
     Copy-Item -ToSession $s -Path $SourceFiles\AdmPwd.PS -Destination $env:ProgramFiles\WindowsPowerShell\Modules -Recurse -ErrorAction SilentlyContinue -Force -Verbose
+
+    #>
+
     #To C:\Windows\PolicyDefinitions
     Copy-Item -ToSession $s -Path "$SourceFiles\Admin Templates\*" -Destination "$env:windir\PolicyDefinitions\" -Recurse -Container:$false -Force -ErrorAction SilentlyContinue
 } catch {

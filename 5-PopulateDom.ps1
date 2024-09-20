@@ -356,8 +356,8 @@ ForEach ($item In $SvcAccList) {
             'co'                = 'Mexico'
             'company'           = $confXML.n.RegisteredOrg
             'department'        = 'IT'
-            'employeeID'        = 'T{0}' -f $item.Tier
-            'employeeType'      = 'ServiceAccount'
+            'employeeType'      = 'T{0}' -f $item.Tier
+            'employeeID'        = 'ServiceAccount'
             'info'              = $item.Description
             'l'                 = 'Puebla'
             'mail'              = 'CEO@eguibarIT.com'
@@ -749,6 +749,8 @@ $ItAdminOuDn = 'OU={0},{1}' -f $confXML.n.Admin.OUs.ItAdminOU.name, $AdDn
 # It Admin Users OU Distinguished Name
 $ItUsersAdminOuDn = 'OU={0},{1}' -f $confXML.n.Admin.OUs.ItAdminAccountsOU.name, $ItAdminOuDn
 
+# Store Passsword as a Secure string
+$SecurePWD = ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force
 
 # BAAD
 Write-Verbose -Message 'Start creating BAAD Semi-Privileged users.'
@@ -795,15 +797,15 @@ Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.InfraAdmins.Name) -Members yoda_T0
 
 Write-Verbose -Message 'Set "standard" password to key users.'
-Set-ADAccountPassword -Identity damaul_T2 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity luskyw_T2 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity bofett_T2 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity dasidi_T1 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity obiwan_T1 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity jabink_T1 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity davade_T0 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity yoda_T0 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
-Set-ADAccountPassword -Identity chwook_T0 -NewPassword (ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -Force)
+Set-ADAccountPassword -Identity damaul_T2 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity luskyw_T2 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity bofett_T2 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity dasidi_T1 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity obiwan_T1 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity jabink_T1 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity davade_T0 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity yoda_T0 -NewPassword $SecurePWD
+Set-ADAccountPassword -Identity chwook_T0 -NewPassword $SecurePWD
 
 Write-Verbose -Message 'Avoid password expire to key users.'
 Set-ADUser -Identity damaul_T2 -PasswordNeverExpires $True
@@ -864,54 +866,307 @@ Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sl'], $NC['Delim'], $confXML.n.
 Set-ADServiceAccount $SvcAcc -PrincipalsAllowedToRetrieveManagedPassword 'Domain Controllers'
 
 # The ServiceAccount cannot contain $ at the end.
-Write-Verbose -Message 'Set housekeeping for User/Group AdminCount.'
-Set-ScheduleAllUserAdminCount -ServiceAccount $SvcAcc.Name -Verbose
-Set-ScheduleAllGroupAdminCount -ServiceAccount $SvcAcc.Name -Verbose
-
-$params = @{
-    ServiceAccount = $SvcAcc.Name
-    SearchRootDN   = $ItAdminOuDn
-    Verbose        = $true
+Write-Verbose -Message 'Set housekeeping for User AdminCount.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; Set-AllUserAdminCount }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Clear AdminCount on Users'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '09:00'
+    TimesPerDay = 4
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all users who have AdminCount attribute set to 1. Considering an Exclusion list, will get all these users and set attribute to 0. Additionally it will reset inheritance on the permissions, so inheritance gets applied.'
+    Confirm     = $false
 }
-Set-SchedulePrivilegedComputers @params
+New-gMSAScheduledTask @Splat
 
-$params = @{
-    ServiceAccount = $SvcAcc.Name
-    AdminUsersDN   = $ItUsersAdminOuDn
-    Verbose        = $true
+
+
+
+
+Write-Verbose -Message 'Set housekeeping for Group AdminCount.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; Set-AllGroupAdminCount }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Clear AdminCount on Groups'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '10:00'
+    TimesPerDay = 4
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all groups who have AdminCount attribute set to 1. Considering an Exclusion list, will get all these groups and set attribute to 0. Additionally it will reset inheritance on the permissions, so inheritance gets applied.'
+    Confirm     = $false
 }
+New-gMSAScheduledTask @Splat
 
-Set-SchedulePrivilegedUsers @params
-Set-ScheduleNonPrivilegedGroups @params
-Set-SchedulePrivilegedGroups @params
-Set-ScheduleSemiPrivilegedKeyPair @params -ExcludeList 'Administrator', $confXML.n.Admin.Users.Admin.Name, $confXML.n.Admin.Users.NEWAdmin.Name
+
+
+
+
+Write-Verbose -Message 'Set housekeeping for Privileged Users.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-PrivilegedUsersHousekeeping ') | Out-Null
+$TaskAction.Append(('-AdminUsersDN "{0}" ' -f $ItUsersAdminOuDn)) | Out-Null
+$TaskAction.Append('-Tier0Group "SG_Tier0Admins" ') | Out-Null
+$TaskAction.Append('-Tier1Group "SG_Tier1Admins" ') | Out-Null
+$TaskAction.Append('-Tier2Group "SG_Tier2Admins" ') | Out-Null
+$TaskAction.Append('-ExcludeList @("TheGood", "TheUgly") ') | Out-Null
+$TaskAction.Append('-DisableNonStandardUsers }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Privileged Users'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '11:00'
+    TimesPerDay = 12
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all Users within a OU (Usually Users within Administration OU), verify if those are assigned to a given tier (either by EmployeeType attribute or by 3 last characters od the SamAccountName) and add them to the matching tier group.'
+    Confirm     = $false
+}
+New-gMSAScheduledTask @Splat
+
+
+
+
+
+Write-Verbose -Message 'Set housekeeping for Non-Privileged Groups.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-NonPrivilegedGroupHousekeeping ') | Out-Null
+$TaskAction.Append(('-AdminUsersDN "{0}" ' -f $ItUsersAdminOuDn)) | Out-Null
+$TaskAction.Append('-Tier0RootOuDN "{0}" ' -f $ItAdminOuDn) | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Non-Privileged Groups'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '11:00'
+    TimesPerDay = 3
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all Users within a OU (Usually Users within Administration OU), and verify those are not added to any group outside scope of Tier0 (Any other group not in Admin/Tier0 OU).'
+    Confirm     = $false
+}
+New-gMSAScheduledTask @Splat
+
+
+
+
+
+Write-Verbose -Message 'Set housekeeping for Privileged Computers.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-PrivilegedComputerHousekeeping ') | Out-Null
+$TaskAction.Append('-SearchRootDN "{0}" ' -f $ItAdminOuDn) | Out-Null
+$TaskAction.Append('-InfraGroup "SL_InfrastructureServers" ') | Out-Null
+$TaskAction.Append('-PawGroup "SL_PAWs" ') | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Privileged Computers'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '5:00'
+    TimesPerDay = 4
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all Computers within a OU (Usually Users within Administration OU), and add it to its corresponding group (Servers and/or PAWs).'
+    Confirm     = $false
+}
+New-gMSAScheduledTask @Splat
+
+
+
+
+
+Write-Verbose -Message 'Set housekeeping for Privileged Groups.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-PrivilegedGroupsHousekeeping ') | Out-Null
+$TaskAction.Append('-AdminGroupsDN "{0}" ' -f $ItAdminOuDn) | Out-Null
+$TaskAction.Append('-ExcludeList @("TheGood", "TheUgly") ') | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Privileged Groups'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '4:00'
+    TimesPerDay = 3
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that audits groups in a specified Admin OU (Tier 0) and ensures that they only contain authorized users. Authorized users are those with a SamAccountName ending in _T0, _T1, or _T2 or those who have the EmployeeType as T0 or T1 or T2. Any users not matching this criteria or not explicitly excluded are removed from these groups.'
+    Confirm     = $false
+}
+New-gMSAScheduledTask @Splat
+
+
+
+
+
+
+Write-Verbose -Message 'Set housekeeping for Privileged users based on Non-Privileged user Key-Pair.'
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-SemiPrivilegedKeyPairCheck ') | Out-Null
+$TaskAction.Append('-AdminUsersDN "{0}" ' -f $ItUsersAdminOuDn) | Out-Null
+$TaskAction.Append('-ExcludeList @("TheGood", "TheUgly") ') | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Non-Privileged user Pair-Key'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '23:00'
+    TimesPerDay = 48
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes a list of semi-privileged users in Active Directory, checks exclusion lists, and either disables or deletes users based on the associated non-privileged user status.'
+    Confirm     = $false
+}
+New-gMSAScheduledTask @Splat
+
+
+
+
 
 # Tier0 SA
-$params = @{
-    ServiceAccount   = $SvcAcc.Name
-    ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier0ServiceAccount.name, $SvcAccPath
-    SAGroupName      = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier0ServiceAccount.name
-    Verbose          = $true
+Write-Verbose -Message 'Set housekeeping for Tier0 Service Accounts & gMSA.'
+$ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier0ServiceAccount.name, $SvcAccPath
+$SAGroupName = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier0ServiceAccount.name
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-ServiceAccountHousekeeping ') | Out-Null
+$TaskAction.Append('-ServiceAccountDN "{0}" ' -f $ServiceAccountDN) | Out-Null
+$TaskAction.Append('-ServiceAccountGroupName "{0}" ' -f $SAGroupName) | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '23:00'
+    TimesPerDay = 48
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier0 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Confirm     = $false
 }
-Set-ScheduleServiceAccounts @params
+New-gMSAScheduledTask @Splat
+
+
+
+
 
 #Tier1 SA
-$params = @{
-    ServiceAccount   = $SvcAcc.Name
-    ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier1ServiceAccount.name, $SvcAccPath
-    SAGroupName      = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier1ServiceAccount.name
-    Verbose          = $true
+Write-Verbose -Message 'Set housekeeping for Tier1 Service Accounts & gMSA.'
+$ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier1ServiceAccount.name, $SvcAccPath
+$SAGroupName = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier1ServiceAccount.name
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-ServiceAccountHousekeeping ') | Out-Null
+$TaskAction.Append('-ServiceAccountDN "{0}" ' -f $ServiceAccountDN) | Out-Null
+$TaskAction.Append('-ServiceAccountGroupName "{0}" ' -f $SAGroupName) | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '22:30'
+    TimesPerDay = 48
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier1 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Confirm     = $false
 }
-Set-ScheduleServiceAccounts @params
+New-gMSAScheduledTask @Splat
+
+
+
+
 
 # Tier2 SA
-$params = @{
-    ServiceAccount   = $SvcAcc.Name
-    ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier2ServiceAccount.name, $SvcAccPath
-    SAGroupName      = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier0ServiceAccount.name
-    Verbose          = $true
+Write-Verbose -Message 'Set housekeeping for Tier2 Service Accounts & gMSA.'
+$ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier2ServiceAccount.name, $SvcAccPath
+$SAGroupName = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier2ServiceAccount.name
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-ServiceAccountHousekeeping ') | Out-Null
+$TaskAction.Append('-ServiceAccountDN "{0}" ' -f $ServiceAccountDN) | Out-Null
+$TaskAction.Append('-ServiceAccountGroupName "{0}" ' -f $SAGroupName) | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '21:15'
+    TimesPerDay = 48
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Confirm     = $false
 }
-Set-ScheduleServiceAccounts @params
+New-gMSAScheduledTask @Splat
+
+
+
+
+
+
+ -Domain 'example.com' -LDAPPath 'OU=SpecialGroups,DC=example,DC=com'
+Write-Verbose -Message 'Set housekeeping for Tier2 Service Accounts & gMSA.'
+$ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier2ServiceAccount.name, $SvcAccPath
+$SAGroupName = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier2ServiceAccount.name
+$TaskAction = [System.Text.StringBuilder]::new()
+$TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
+$TaskAction.Append('-NoLogo ') | Out-Null
+$TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Set-AdLocalAdminHousekeeping ') | Out-Null
+$TaskAction.Append('-LDAPPath "{0}" ' -f $ItAdminOuDn) | Out-Null
+$TaskAction.Append(' }"') | Out-Null
+$Splat = @{
+    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskAction  = $TaskAction
+    ActionPath  = 'pwsh.exe'
+    gMSAAccount = $SvcAcc
+    TriggerType = 'Daily'
+    StartTime   = '14:20'
+    TimesPerDay = 48
+    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Confirm     = $false
+}
+New-gMSAScheduledTask @Splat
 
 ###############################################################################
 # END Scheduled Tasks
