@@ -70,6 +70,8 @@ $ConfigJSON = ConvertTo-Json -InputObject @{
 $ConfigJSON | Out-File -Force $ConfigPath
 #>
 
+$VerbosePreference = 'SilentlyContinue'
+
 Import-Module -Name ServerManager -Verbose:$false | Out-Null
 Import-Module -Name GroupPolicy -Verbose:$false | Out-Null
 
@@ -89,6 +91,7 @@ foreach ($item in $AllModules) {
     Import-Module @Splat | Out-Null
 
 }
+$VerbosePreference = 'Continue'
 [System.Environment]::NewLine
 
 

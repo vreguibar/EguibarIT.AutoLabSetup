@@ -73,6 +73,8 @@ $ConfigJSON | Out-File -Force $ConfigPath
 # https://learn.microsoft.com/en-us/archive/blogs/adpowershell/disable-loading-the-default-drive-ad-during-import-module
 #$Env:ADPS_LoadDefaultDrive = 0
 
+$VerbosePreference = 'SilentlyContinue'
+
 Import-Module -Name ServerManager -Force -Verbose:$false | Out-Null
 Import-Module -Name GroupPolicy -Force -Verbose:$false | Out-Null
 
@@ -116,6 +118,8 @@ foreach ($item in $AllModules) {
         throw
     } #end Try-Catch
 } #end ForEach
+
+$VerbosePreference = 'Continue'
 
 [System.Environment]::NewLine
 
