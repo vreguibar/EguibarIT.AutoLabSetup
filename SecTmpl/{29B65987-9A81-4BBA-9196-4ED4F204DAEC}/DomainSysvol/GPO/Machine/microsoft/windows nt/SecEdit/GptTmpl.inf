@@ -1,0 +1,10 @@
+[Version]
+signature="$CHICAGO$"
+Revision=1
+
+[Unicode]
+Unicode=yes
+
+[Privilege Rights]
+SeInteractiveLogonRight = *S-1-5-32-544,
+SeRemoteInteractiveLogonRight = *S-1-5-32-544

@@ -20,6 +20,7 @@ param(
 )
 Begin {
     $results = [ordered]@{}
+
     If (-not $rootdir) {
         $rootdir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
         Write-Verbose -Message ('Root path is: {0}' -f $rootdir)
@@ -27,13 +28,26 @@ Begin {
 }
 
 Process {
-    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
-        $guid = $_.Directory.Name
-        $x = [xml](Get-Content $_)
-        $dn = $x.GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
-        # $dn + "`t" + $guid
-        $results.Add($dn, $guid)
-    }
+    $AllElements = Get-ChildItem -Recurse -Include backup.xml $rootdir
+
+    Foreach ($item in $AllElements) {
+
+        try {
+            $guid = $item.Directory.Name
+            $x = [xml](Get-Content $item)
+            $dn = $x.GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
+            $results.Add($dn, $guid)
+        } catch {
+            Write-Error -Message ('
+                Something went wrong.
+                Policy GUID: {0}
+                Policy Name: {1}
+                {2}' -f
+                $guid, $dn, $_
+            )
+        }
+    } #end Foreach
+    Write-Output ('Found {0} GPO backups' -f $results.Count)
 }
 
 End {
