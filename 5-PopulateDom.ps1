@@ -73,7 +73,7 @@ $ConfigJSON | Out-File -Force $ConfigPath
 $VerbosePreference = 'SilentlyContinue'
 
 Import-Module -Name ServerManager -Verbose:$false | Out-Null
-Import-Module -Name GroupPolicy -Verbose:$false | Out-Null
+Import-Module -Name GroupPolicy -SkipEditionCheck -Verbose:$false | Out-Null
 
 $AllModules = @(
     'ActiveDirectory',
@@ -259,7 +259,7 @@ ForEach ($item In $UserList) {
 
     }
 
-    Revoke-Inheritance -path $newHomeFolder
+    Revoke-Inheritance -path $newHomeFolder -RemoveInheritance -KeepPermissions
     Revoke-NTFSPermissions -path $newHomeFolder -object EVERYONE -permission 'FullControl, ChangePermissions'
     Grant-NTFSPermission -path $newHomeFolder -object $item.Name -permission 'FullControl, ChangePermissions'
 
@@ -874,7 +874,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; Set-AllUserAdminCount }"') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; Set-AllUserAdminCount }"') | Out-Null
 $Splat = @{
     TaskName    = 'Clear AdminCount on Users'
     TaskAction  = $TaskAction
@@ -883,7 +883,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '09:00'
     TimesPerDay = 4
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all users who have AdminCount attribute set to 1. Considering an Exclusion list, will get all these users and set attribute to 0. Additionally it will reset inheritance on the permissions, so inheritance gets applied.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all users who have AdminCount attribute set to 1. Considering an Exclusion list, will get all these users and set attribute to 0. Additionally it will reset inheritance on the permissions, so inheritance gets applied.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -897,7 +897,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; Set-AllGroupAdminCount }"') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; Set-AllGroupAdminCount }"') | Out-Null
 $Splat = @{
     TaskName    = 'Clear AdminCount on Groups'
     TaskAction  = $TaskAction
@@ -906,7 +906,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '10:00'
     TimesPerDay = 4
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all groups who have AdminCount attribute set to 1. Considering an Exclusion list, will get all these groups and set attribute to 0. Additionally it will reset inheritance on the permissions, so inheritance gets applied.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all groups who have AdminCount attribute set to 1. Considering an Exclusion list, will get all these groups and set attribute to 0. Additionally it will reset inheritance on the permissions, so inheritance gets applied.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -920,7 +920,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-PrivilegedUsersHousekeeping ') | Out-Null
 $TaskAction.Append(('-AdminUsersDN "{0}" ' -f $ItUsersAdminOuDn)) | Out-Null
 $TaskAction.Append('-Tier0Group "SG_Tier0Admins" ') | Out-Null
@@ -936,7 +936,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '11:00'
     TimesPerDay = 12
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all Users within a OU (Usually Users within Administration OU), verify if those are assigned to a given tier (either by EmployeeType attribute or by 3 last characters od the SamAccountName) and add them to the matching tier group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Users within a OU (Usually Users within Administration OU), verify if those are assigned to a given tier (either by EmployeeType attribute or by 3 last characters od the SamAccountName) and add them to the matching tier group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -950,7 +950,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-NonPrivilegedGroupHousekeeping ') | Out-Null
 $TaskAction.Append(('-AdminUsersDN "{0}" ' -f $ItUsersAdminOuDn)) | Out-Null
 $TaskAction.Append('-Tier0RootOuDN "{0}" ' -f $ItAdminOuDn) | Out-Null
@@ -963,7 +963,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '11:00'
     TimesPerDay = 3
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all Users within a OU (Usually Users within Administration OU), and verify those are not added to any group outside scope of Tier0 (Any other group not in Admin/Tier0 OU).'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Users within a OU (Usually Users within Administration OU), and verify those are not added to any group outside scope of Tier0 (Any other group not in Admin/Tier0 OU).'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -977,7 +977,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-PrivilegedComputerHousekeeping ') | Out-Null
 $TaskAction.Append('-SearchRootDN "{0}" ' -f $ItAdminOuDn) | Out-Null
 $TaskAction.Append('-InfraGroup "SL_InfrastructureServers" ') | Out-Null
@@ -991,7 +991,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '5:00'
     TimesPerDay = 4
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that will look for all Computers within a OU (Usually Users within Administration OU), and add it to its corresponding group (Servers and/or PAWs).'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Computers within a OU (Usually Users within Administration OU), and add it to its corresponding group (Servers and/or PAWs).'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1005,7 +1005,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-PrivilegedGroupsHousekeeping ') | Out-Null
 $TaskAction.Append('-AdminGroupsDN "{0}" ' -f $ItAdminOuDn) | Out-Null
 $TaskAction.Append('-ExcludeList @("TheGood", "TheUgly") ') | Out-Null
@@ -1018,7 +1018,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '4:00'
     TimesPerDay = 3
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that audits groups in a specified Admin OU (Tier 0) and ensures that they only contain authorized users. Authorized users are those with a SamAccountName ending in _T0, _T1, or _T2 or those who have the EmployeeType as T0 or T1 or T2. Any users not matching this criteria or not explicitly excluded are removed from these groups.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that audits groups in a specified Admin OU (Tier 0) and ensures that they only contain authorized users. Authorized users are those with a SamAccountName ending in _T0, _T1, or _T2 or those who have the EmployeeType as T0 or T1 or T2. Any users not matching this criteria or not explicitly excluded are removed from these groups.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1033,7 +1033,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-SemiPrivilegedKeyPairCheck ') | Out-Null
 $TaskAction.Append('-AdminUsersDN "{0}" ' -f $ItUsersAdminOuDn) | Out-Null
 $TaskAction.Append('-ExcludeList @("TheGood", "TheUgly") ') | Out-Null
@@ -1046,7 +1046,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '23:00'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes a list of semi-privileged users in Active Directory, checks exclusion lists, and either disables or deletes users based on the associated non-privileged user status.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes a list of semi-privileged users in Active Directory, checks exclusion lists, and either disables or deletes users based on the associated non-privileged user status.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1063,7 +1063,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-ServiceAccountHousekeeping ') | Out-Null
 $TaskAction.Append('-ServiceAccountDN "{0}" ' -f $ServiceAccountDN) | Out-Null
 $TaskAction.Append('-ServiceAccountGroupName "{0}" ' -f $SAGroupName) | Out-Null
@@ -1076,7 +1076,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '23:00'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier0 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier0 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1093,20 +1093,20 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-ServiceAccountHousekeeping ') | Out-Null
 $TaskAction.Append('-ServiceAccountDN "{0}" ' -f $ServiceAccountDN) | Out-Null
 $TaskAction.Append('-ServiceAccountGroupName "{0}" ' -f $SAGroupName) | Out-Null
 $TaskAction.Append(' }"') | Out-Null
 $Splat = @{
-    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskName    = 'Housekeeping for Tier1 Service Accounts & gMSA'
     TaskAction  = $TaskAction
     ActionPath  = 'pwsh.exe'
     gMSAAccount = $SvcAcc
     TriggerType = 'Daily'
     StartTime   = '22:30'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier1 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier1 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1123,20 +1123,20 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-ServiceAccountHousekeeping ') | Out-Null
 $TaskAction.Append('-ServiceAccountDN "{0}" ' -f $ServiceAccountDN) | Out-Null
 $TaskAction.Append('-ServiceAccountGroupName "{0}" ' -f $SAGroupName) | Out-Null
 $TaskAction.Append(' }"') | Out-Null
 $Splat = @{
-    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskName    = 'Housekeeping for Tier2 Service Accounts & gMSA'
     TaskAction  = $TaskAction
     ActionPath  = 'pwsh.exe'
     gMSAAccount = $SvcAcc
     TriggerType = 'Daily'
     StartTime   = '21:15'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1154,7 +1154,7 @@ $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
-$TaskAction.Append('Import-Module EguibarIT.Housekeeping; ') | Out-Null
+$TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; ') | Out-Null
 $TaskAction.Append('Set-AdLocalAdminHousekeeping ') | Out-Null
 $TaskAction.Append('-LDAPPath "{0}" ' -f $ItAdminOuDn) | Out-Null
 $TaskAction.Append(' }"') | Out-Null
@@ -1166,7 +1166,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '14:20'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT-Housekeeping Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat

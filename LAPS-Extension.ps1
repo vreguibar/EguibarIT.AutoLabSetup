@@ -123,7 +123,7 @@ Set-ItemProperty -Path $regkeyPath -Name 'AutoAdminLogon' -Value 1
 if (-not(Test-RegistryValue -Path $regkeypath -Value 'DefaultUserName')) {
     New-ItemProperty -Path $regkeypath -Name 'DefaultUserName' -PropertyType String
 }
-Set-ItemProperty -Path $regkeyPath -Name 'DefaultUserName' -Value $confXML.N.Admin.Users.Admin.Name
+Set-ItemProperty -Path $regkeyPath -Name 'DefaultUserName' -Value $confXML.N.Admin.Users.NewAdmin.Name
 
 # Set the Password
 if (-not(Test-RegistryValue -Path $regkeypath -Value 'DefaultPassword')) {
@@ -213,7 +213,7 @@ Try {
 
         $File = '4-ConfigureDom.ps1'
         $NextFile = '{0}\{1}' -f $DMscripts, $file
-        $UserID = $confXML.N.Admin.Users.Admin.Name
+        $UserID = $confXML.N.Admin.Users.NewAdmin.Name
         $Arguments = '-NoLogo -NoExit -ExecutionPolicy Bypass -File {0}' -f $NextFile
 
         $principal = New-ScheduledTaskPrincipal -UserId $UserID -LogonType Interactive -RunLevel Highest

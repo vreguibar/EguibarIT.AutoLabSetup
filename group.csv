@@ -46,11 +46,12 @@ to assist the overwhelmed
 Jedi....";Global
 BAAD;BAAD;;BAAD
 Besalisk;besalisk;;Global
+Broker;Broker associates. All members of this group are broker agents.;;Global
 Canto Bight;Located on the desert world of Cantonica;;UGLY
 Cerean;Cerean;;Global
 Chagrian;Chagria;;Global
 Clawdite;Clawdite;;Global
-Contractor;Contractor;;GOOD
+Contractor;Contractor;;Global
 Corellia;An ancient world in the galactic Core, Corellia is known for its people?s wanderlust and its massive shipyards;;BAAD
 Coruscant;A city-covered planet, Coruscant is the vibrant heart and capital of the galaxy, featuring a diverse mix of citizens and culture;;GOOD
 Dagobah;Home to Yoda during his final years, Dagobah was a swamp-covered planet strong with the Force;;GOOD
@@ -65,8 +66,9 @@ Eadu;A rugged planet in the Outer Rim?s Bheriz sector;;BAAD
 Earth;Earth;;BAAD
 Endor;The lush, forest home of the Ewok species is the gravesite of Darth Vader and the Empire itself.;;GOOD
 Ewok;Ewokese;;Global
+Females;Females;;Global
 Florrum;A harsh, arid desert world in the Outer Rim Territories, Florrum is off the beaten path of major galactic hyperspace routes, making it the perfect haven for hunted criminals or lawless thugs;;BAAD
-Freelance;Freelance;;UGLY
+Freelance;Freelance;;Global
 Galactic Republic;Galactic Republic;;UGLY
 Gauteng;Gauteng;;UGLY
 Geonosian;Geonosian;;Global
@@ -79,7 +81,7 @@ Hutt;Huttese;;Global
 Ibaar;Ibaar was devasted when the Empire cut off all food and ration imports to the planet;;GOOD
 Iego;"World on the fringes of the known galaxy, surrounded by a thousand moons. Lovely creatures referred to as ""Angels"" are known to inhabit the moons";;UGLY
 Iktotchi;Iktotchese;;Global
-Interim;Interim;;BAAD
+Interim;Interim;;Global
 Jakku;A harsh desert world, Jakku is a lawless place that?s home to thieves, outlaws and refugees;;UGLY
 Jalath;Jalath is a city on Lothal and home to an Imperial facility, erected after the Empire's occupation of the planet;;BAAD
 Jedha;A small desert moon frosted by a permanent winter, Jedha is home to one of the first civilizations to explore the nature of the Force.;;UGLY
@@ -93,6 +95,7 @@ Lah'Mu;Located in the Outer Rim?s Raioballo sector, Lah?mu is a sparsely inhabit
 Lothal;Lothal is a diverse planet, with both farmland and a city center.;;BAAD
 Malachor;A dark planet with an even darker history, Malachor is a location Jedi are told from a young age to avoid;;BAAD
 Malastare;Located in the galaxy's Mid Rim, Malastare was the homeworld of the irascible Dugs;;UGLY
+Males;Males;;Global
 Mirialan;Mirialan;;Global
 Mon Calamari;Mon Calamarian;;Global
 Mustafar;A tiny, fiery planet in the Outer Rim, Mustafar maintains an erratic orbit between two gas giants;;BAAD
@@ -106,7 +109,7 @@ Okinawa;Okinawa;;UGLY
 Onderon;world marked with savage jungles that were filled with dangerous creatures. To survive, the primitive human inhabitants of the planet protected themselves behind the walls of fortified settlements;;UGLY
 Otoh Gunga;Beneath the surface of Lake Paonga on Naboo is a spectacular Gungan city;;UGLY
 Pau'an;Utapese;;Global
-Permanent;Permanent;;UGLY
+Permanent;Permanent;;Global
 Pillio;Due to its enormous amount of sea life, and the tremendous coral reef across the entire planet, Pillio is an oceanic world;;GOOD
 Polis Massa;An obscure planetoid deep in the Outer Rim, Polis Massa nonetheless occupied an important place in galactic history: The Skywalker twins were born there and given names by their mother Padm‚ Amidala before she died;;GOOD
 Puebla;Puebla;;BAAD
@@ -243,5 +246,3 @@ Yoda's species;Galactic basic;;Global
 Zabrak;Zabraki;;Global
 Zanbar;A moon used by the Mandalorian Death Watch as a temporary base during the Clone War;;BAAD
 Zygerria;Zygerria is a picturesque world with fortress-capped mesas that extend above windswept plains;;BAAD
-Males;Males;;Global
-Females;Females;;Global
