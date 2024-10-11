@@ -473,132 +473,36 @@ ForEach ($item In $GroupList) {
                 $strCountry = 'IT'
             }
         }
-        Add-ADGroupMember -Identity $item.name -Members (Get-ADUser -Filter * -Properties * | Where-Object { $_.Country -eq $strCountry }) -ErrorAction SilentlyContinue
+        Add-ADGroupMember -Identity $item.name -Members (Get-ADUser -Filter "Country -eq $strCountry" -Properties Country )
 
     }
 
 
-    <#
-    $AllCities = @(
-        'A New Hope',
-        'Ahch-To',
-        'Alberta',
-        'Alderaan',
-        'Aleen',
-        'Asturias',
-        'Attack of the Clones',
-        'BAAD',
-        'Besalisk',
-        'Canto Bight',
-        'Cerean',
-        'Chagrian',
-        'Clawdite',
-        'Contractor',
-        'Corellia',
-        'Coruscant',
-        'Dagobah',
-        'Dantoonie',
-        'Death Star',
-        'Devaron',
-        'Dijon',
-        "D'Qar",
-        'Droid',
-        'Dug',
-        'Eadu',
-        'Earth',
-        'Endor',
-        'Ewok',
-        'Florrum',
-        'Freelance',
-        'Galactic Republic',
-        'Gauteng',
-        'Geonosian',
-        'Geonosis',
-        'GOOD',
-        'Gungan',
-        'Hoth',
-        'Human',
-        'Hutt',
-        'Ibaar',
-        'Iego',
-        'Iktotchi',
-        'Interim',
-        'Jakku',
-        'Jalath',
-        'Jedha',
-        'Kaleesh',
-        'Kamino',
-        'Kaminoan',
-        'Kashyyyk',
-        'Kel Dor',
-        'Kessel',
-        "Lah'Mu",
-        'Lothal',
-        'Malachor',
-        'Malastare',
-        'Mirialan',
-        'Mon Calamari',
-        'Mustafar',
-        'Muun',
-        'Mykapo',
-        'Naboo',
-        'Nautolan',
-        'Neimodian',
-        'Oba Diah',
-        'Okinawa',
-        'Onderon',
-        'Otoh Gunga',
-        "Pau'an"
-        'Permanent',
-        'Pillio',
-        'Polis Massa',
-        'Puebla',
-        'Quermian',
-        'Raxus',
-        'Return of the Jedi',
-        'Revenge of the Sith',
-        'Ringo Vinda',
-        'Rodian',
-        'Rodian',
-        'Sao Paulo',
-        'Scarif',
-        'Serenno',
-        'Skakoan',
-        'Starkiller Base',
-        'Stygeon Prime',
-        'Sullustan',
-        'Svareen',
-        'Takodana',
-        'Tatooine',
-        'The Empire Strikes Back',
-        'The Force Awakens',
-        'The Phantom Menace',
-        'Tholothian',
-        'Togruta',
-        'Toong',
-        'Toscana',
-        'Toydarian',
-        'Trandoshan',
-        'Tuanul',
-        "Twi'lek",
-        'UGLY',
-        'Vandor',
-        'Vulptereen',
-        'Wobani',
-        'Wookiee',
-        'Xexto',
-        'Yavin 4',
-        "Yoda's species",
-        'Zabrak',
-        'Zanbar',
-        'Zygerria')
 
-    # Add the users to the group by filtering by City
-    If ($AllCities -contains $item.name)
-    {
-        Add-ADGroupMember -Identity $item.name -Members (Get-ADUser -Filter * -Properties * | where-object { $_.City -eq $item.name }) -ErrorAction SilentlyContinue
-    }
-    #>
+
+
+
+    # Add the users to the group by filtering by City or st or physicalDeliveryOfficeName
+    If ($GroupList.name -contains $item.name) {
+
+        $filterCondition = "City -eq '$($item.name)'"
+        $filterCondition += ' -or '
+        $filterCondition += "st -eq '$($item.name)'"
+        $filterCondition += ' -or '
+        $filterCondition += "physicalDeliveryOfficeName -eq '$($item.name)'"
+
+        $UserMembers = Get-ADUser -Filter $filterCondition -Properties City, st, physicalDeliveryOfficeName
+
+        If ($UserMembers) {
+            Add-ADGroupMember -Identity $item.name -Members $UserMembers
+        } else {
+            Write-Verbose -Message ('Group {0} has no members' -f $item.name)
+        } #end If-Else
+
+    } #end If
+
+
+
 
 
     If (($item.name -eq 'Broker') -or `
@@ -606,9 +510,10 @@ ForEach ($item In $GroupList) {
         ($item.name -eq 'Freelance') -or `
         ($item.name -eq 'Interim') -or `
         ($item.name -eq 'Permanent')) {
-        Add-ADGroupMember -Identity $item.name -Members (Get-ADUser -Filter * -Properties * | Where-Object { $_.employeeType -eq $item.name }) -ErrorAction SilentlyContinue
 
-    }
+        Add-ADGroupMember -Identity $item.name -Members (Get-ADUser -Filter "employeeType -eq '$($item.name)'" -Properties employeeType)
+
+    } #end If
 
 
 
@@ -717,11 +622,16 @@ ForEach ($item In $ShareList) {
             Toscana {
                 $strCountry = 'IT'
             }
+        }#end Switch
+        $Splat = @{
+            Identity    = ('{0}_CHANGE_{1}' -f $NC['sl'], $item.ShareName)
+            Members     = (Get-ADUser -Filter "Country -eq $strCountry" -Properties SamAccountName, Country)
+            ErrorAction = 'SilentlyContinue'
         }
-        Add-ADGroupMember -Identity ('{0}_CHANGE_{1}' -f $NC['sl'], $item.ShareName) -Members (Get-ADUser -Filter * -Properties SamAccountName, Country | Where-Object { $_.Country -eq $strCountry }) -ErrorAction SilentlyContinue
+        Add-ADGroupMember @Splat
 
-    }
-}
+    } #end If
+} #end Foreach ShareList
 ###############################################################################
 # END  Creating Shares and LocalGroups from CSV
 ###############################################################################
@@ -836,9 +746,9 @@ Set-ADUser -Identity $confXML.n.admin.Users.NEWAdmin.Name -PasswordNeverExpires 
 
 # Pre-Stage PAWs
 Write-Verbose -Message 'Pre-Stage one PAW for Tier0, Tier1 and Tier2'
-New-ADComputer -Name Paw01 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
-New-ADComputer -Name Paw11 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
-New-ADComputer -Name Paw21 -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name 'Paw01' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name 'Paw11' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name 'Paw21' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 ###############################################################################
 # END Define OU Administrator and backup admin
 ###############################################################################
@@ -865,9 +775,6 @@ Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sl'], $NC['Delim'], $confXML.n.
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sl'], $NC['Delim'], $confXML.n.Admin.lg.gm.name) -Members $SvcAcc
 
 
-#Configure gMSA so all members of group "Domain Controllers" can retrieve the password
-Set-ADServiceAccount $SvcAcc -PrincipalsAllowedToRetrieveManagedPassword 'Domain Controllers'
-
 # The ServiceAccount cannot contain $ at the end.
 Write-Verbose -Message 'Set housekeeping for User AdminCount.'
 $TaskAction = [System.Text.StringBuilder]::new()
@@ -876,7 +783,7 @@ $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
 $TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; Set-AllUserAdminCount }"') | Out-Null
 $Splat = @{
-    TaskName    = 'Clear AdminCount on Users'
+    TaskName    = 'Housekeeping for Clear AdminCount on Users'
     TaskAction  = $TaskAction
     ActionPath  = 'pwsh.exe'
     gMSAAccount = $SvcAcc
@@ -899,7 +806,7 @@ $TaskAction.Append('-NoLogo ') | Out-Null
 $TaskAction.Append('-Command "{ Set-ExecutionPolicy -ExecutionPolicy bypass; ') | Out-Null
 $TaskAction.Append('Import-Module EguibarIT.HousekeepingPS; Set-AllGroupAdminCount }"') | Out-Null
 $Splat = @{
-    TaskName    = 'Clear AdminCount on Groups'
+    TaskName    = 'Housekeeping for Clear AdminCount on Groups'
     TaskAction  = $TaskAction
     ActionPath  = 'pwsh.exe'
     gMSAAccount = $SvcAcc
@@ -936,7 +843,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '11:00'
     TimesPerDay = 12
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Users within a OU (Usually Users within Administration OU), verify if those are assigned to a given tier (either by EmployeeType attribute or by 3 last characters od the SamAccountName) and add them to the matching tier group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Users within a OU (Usually Users within Administration OU), verify if those are assigned to a given tier (either by EmployeeType attribute or by 3 last characters od the SamAccountName) and add them to the matching tier group (SG_Tier0Admins/SG_Tier1Admins/SG_Tier2Admins).'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -991,7 +898,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '5:00'
     TimesPerDay = 4
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Computers within a OU (Usually Users within Administration OU), and add it to its corresponding group (Servers and/or PAWs).'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that will look for all Computers within a OU (Either Infrastructure Servers or PAWs within Administration OU), and add it to its corresponding group (Servers and/or PAWs).'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1046,7 +953,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '23:00'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes a list of semi-privileged users in Active Directory, checks exclusion lists, and either disables or deletes users based on the associated non-privileged user status.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes users in the given DistinguishedName, checks exclusion lists, and either disables or deletes users based on the associated non-privileged user status. The Semi-Privileged user account is associated to a Non-Privileged account by storing the Non-Privileged account SID into the employeeNumber attribute of the Semi-Privileged user.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1076,7 +983,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '23:00'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier0 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier0 Service Accounts & gMSA. It ensures that all accounts in the Tier0 OU are members of Tier0 Service Accounts group (SG_T0SA) and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1106,7 +1013,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '22:30'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier1 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier1 Service Accounts & gMSA. It ensures that all accounts in the Tier1 OU are members of Tier1 Service Accounts group (SG_T1SA) and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1136,7 +1043,7 @@ $Splat = @{
     TriggerType = 'Daily'
     StartTime   = '21:15'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier2 Service Accounts & gMSA. It ensures that all accounts in the Tier2 OU are members of Tier2 Service Accounts group (SG_T2SA) and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
@@ -1147,9 +1054,11 @@ New-gMSAScheduledTask @Splat
 
 
 
-Write-Verbose -Message 'Set housekeeping for Tier2 Service Accounts & gMSA.'
+Write-Verbose -Message 'Set housekeeping for Tier1 servers and their Local Admin Group.'
+
 $ServiceAccountDN = 'OU={0},{1}' -f $confXML.n.Admin.GG.Tier2ServiceAccount.name, $SvcAccPath
 $SAGroupName = '{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.Admin.GG.Tier2ServiceAccount.name
+
 $TaskAction = [System.Text.StringBuilder]::new()
 $TaskAction.Append('-ExecutionPolicy ByPass ') | Out-Null
 $TaskAction.Append('-NoLogo ') | Out-Null
@@ -1159,14 +1068,14 @@ $TaskAction.Append('Set-AdLocalAdminHousekeeping ') | Out-Null
 $TaskAction.Append('-LDAPPath "{0}" ' -f $ItAdminOuDn) | Out-Null
 $TaskAction.Append(' }"') | Out-Null
 $Splat = @{
-    TaskName    = 'Housekeeping for Tier0 Service Accounts & gMSA'
+    TaskName    = 'Housekeeping for Tier1 Server Local Admin Group'
     TaskAction  = $TaskAction
     ActionPath  = 'pwsh.exe'
     gMSAAccount = $SvcAcc
     TriggerType = 'Daily'
     StartTime   = '14:20'
     TimesPerDay = 48
-    Description = 'PowerShell Function (from EguibarIT.HousekeepingPS Module) that processes Tier2 Service Accounts & gMSA It ensures that all accounts in the OU are members of a specified group and sets their employeeID attribute to ServiceAccount. If the account does not exist within the OU, it will get removed from the group.'
+    Description = 'PowerShell Function from EguibarIT.HousekeepingPS Module. Manage local administrative groups for servers in a domain. This function performs housekeeping for local administrative groups on servers within a domain. It will:    A) Retrieve all servers in the domain.    B) Ensure each server has a corresponding local admin group named "Admin_<HostName>". If such a group does not exist, it will be created at the specified LDAP path.    C) Check if each "Admin_<HostName>" group corresponds to an existing server. If the server does not exist in AD, the group will be deleted.'
     Confirm     = $false
 }
 New-gMSAScheduledTask @Splat
