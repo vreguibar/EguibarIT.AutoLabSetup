@@ -39,7 +39,7 @@ Param(
 
 $VerbosePreference = 'Continue'
 
-$Splat = [hashtable]::New()
+$Splat = [hashtable]::New([StringComparer]::OrdinalIgnoreCase)
 
 # Change Execution Policy
 #Set-ExecutionPolicy -ExecutionPolicy Unrestricted
@@ -250,7 +250,7 @@ $ScriptBlock = {
         Verbose     = $true
     }
     try {
-        Register-ScheduledTask @Splat
+        #Register-ScheduledTask @Splat
     } catch {
         Throw
     }
