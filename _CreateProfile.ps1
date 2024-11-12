@@ -102,14 +102,14 @@ $ScriptBlock = {
 
     # Make Powershell default shell
     $regkeypath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-    If ($OsInstallationType -ne 'Server Core') {
+    If ($OsInstallationType -eq 'Server Core') {
 
         if (-not(Get-ItemProperty -Path $regkeypath).Shell) {
             New-ItemProperty -Path $regkeypath -Name 'Shell' -PropertyType String
         } #end If
 
-        #Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'CMD.exe /c "Start SConfig && Start CMD.exe && Start pwsh.exe"'
-        Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'pwsh.exe'
+        Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'CMD.exe /c "Start SConfig && Start CMD.exe && Start pwsh.exe"'
+        #Set-ItemProperty -Path $regkeyPath -Name 'Shell' -Value 'pwsh.exe'
 
     } #end If
 

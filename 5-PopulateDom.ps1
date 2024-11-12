@@ -667,19 +667,19 @@ $SecurePWD = ConvertTo-SecureString -AsPlainText $confXML.n.DefaultPassword -For
 
 # BAAD
 Write-Verbose -Message 'Start creating BAAD Semi-Privileged users.'
-New-SemiPrivilegedUser -SamAccountName damaul -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -Verbose
-New-SemiPrivilegedUser -SamAccountName dasidi -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -Verbose
-New-SemiPrivilegedUser -SamAccountName davade -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -Verbose
+New-SemiPrivilegedUser -SamAccountName damaul -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
+New-SemiPrivilegedUser -SamAccountName dasidi -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
+New-SemiPrivilegedUser -SamAccountName davade -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
 #GOOD
 Write-Verbose -Message 'Start creating GOOD Semi-Privileged users.'
-New-SemiPrivilegedUser -SamAccountName luskyw -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -Verbose
-New-SemiPrivilegedUser -SamAccountName obiwan -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -Verbose
-New-SemiPrivilegedUser -SamAccountName yoda -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -Verbose
+New-SemiPrivilegedUser -SamAccountName luskyw -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
+New-SemiPrivilegedUser -SamAccountName obiwan -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
+New-SemiPrivilegedUser -SamAccountName yoda -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
 #UGLY
 Write-Verbose -Message 'Start creating UGLY Semi-Privileged users.'
-New-SemiPrivilegedUser -SamAccountName bofett -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -Verbose
-New-SemiPrivilegedUser -SamAccountName jabink -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -Verbose
-New-SemiPrivilegedUser -SamAccountName chwook -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -Verbose
+New-SemiPrivilegedUser -SamAccountName bofett -AccountType T2 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
+New-SemiPrivilegedUser -SamAccountName jabink -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
+New-SemiPrivilegedUser -SamAccountName chwook -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
 
 # Add to SG_Tier0Admins
 Write-Verbose -Message 'Start granting Tier0 roles to Semi-Privileged users.'

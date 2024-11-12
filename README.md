@@ -15,7 +15,7 @@ For more information and videos, please visit <a href="https://eguibarit.eu/auto
 
 ## Files and Folders
 
-The main scripts are numbered from 1 to 5, each having a specific purpose. All requiered files are copied by the file _CreateProfile.ps1 and then being "called" on each stage.
+The main scripts are numbered from 1 to 5, each having a specific purpose. All required files are copied by the file _CreateProfile.ps1 and then being "called" on each stage.
 
 ## _CreateProfile.ps1
 
@@ -30,7 +30,7 @@ This script will:
 - Set registry keys for automatic logon
 - Create Scheduled Task so any user who logon will have CMD and SConfig among the default shell.
 - Create Scheduled Task that will execute the next script.
-- Copy all requiered files to the session.
+- Copy all required files to the session.
 - Check if more than 1 disk is configured (in our case DC's have 6 disks, so it will initialize, format and configure accordingly).
 
 Reboot the VM.
