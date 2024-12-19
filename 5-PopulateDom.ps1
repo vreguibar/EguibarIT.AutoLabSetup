@@ -681,12 +681,19 @@ New-SemiPrivilegedUser -SamAccountName bofett -AccountType T2 -AdminUsersDN $ItU
 New-SemiPrivilegedUser -SamAccountName jabink -AccountType T1 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
 New-SemiPrivilegedUser -SamAccountName chwook -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
 
+# Add Tier0 admins to T0 AuditOnly Silo
+Set-ADUser -Identity 'chwook_T0' -AuthenticationPolicySilo 'T0_AuditingSilo'
+Set-ADUser -Identity 'davade_T0' -AuthenticationPolicySilo 'T0_AuditingSilo'
+Set-ADUser -Identity 'yoda_T0' -AuthenticationPolicySilo 'T0_AuditingSilo'
+
 # Add to SG_Tier0Admins
 Write-Verbose -Message 'Start granting Tier0 roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.admin.gg.tier0admins.name) -Members chwook_T0, davade_T0, yoda_T0
+
 # Add to SG_Tier1Admins
 Write-Verbose -Message 'Start granting Tier1 roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.admin.gg.tier1admins.name) -Members dasidi_T1, jabink_T1, obiwan_T1
+
 # Add to SG_Tier2Admins
 Write-Verbose -Message 'Start granting Tier2 roles to Semi-Privileged users.'
 Add-ADGroupMember -Identity ('{0}{1}{2}' -f $NC['sg'], $NC['Delim'], $confXML.n.admin.gg.tier2admins.name) -Members damaul_T2, luskyw_T2, bofett_T2
@@ -745,10 +752,17 @@ Set-ADUser -Identity $confXML.n.admin.Users.Admin.Name -PasswordNeverExpires $Tr
 Set-ADUser -Identity $confXML.n.admin.Users.NEWAdmin.Name -PasswordNeverExpires $True
 
 # Pre-Stage PAWs
-Write-Verbose -Message 'Pre-Stage one PAW for Tier0, Tier1 and Tier2'
+Write-Verbose -Message 'Pre-Stage two PAW for Tier0, Tier1 and Tier2'
 New-ADComputer -Name 'Paw01' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name 'Paw02' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT0OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 New-ADComputer -Name 'Paw11' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name 'Paw12' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT1OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 New-ADComputer -Name 'Paw21' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+New-ADComputer -Name 'Paw22' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
+
+# Add PAWs to Tier0 AuditOnly Silo
+Set-ADComputer -Identity 'Paw01' -AuthenticationPolicySilo 'T0_AuditingSilo'
+Set-ADComputer -Identity 'Paw02' -AuthenticationPolicySilo 'T0_AuditingSilo'
 ###############################################################################
 # END Define OU Administrator and backup admin
 ###############################################################################
