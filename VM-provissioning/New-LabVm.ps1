@@ -15,7 +15,7 @@ Param(
         HelpMessage = 'Type of OS for the Virtual Machine.',
         Position = 1)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('Win10', 'Win11', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE')]
+    [ValidateSet('Win10', 'Win11', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE', 'W2025-CORE', 'W2025-GUI')]
     [string]
     $vmOsType,
 
@@ -217,15 +217,47 @@ switch ($vmOsType) {
 
     } #----- End of Option 6 -----
 
+    # Option 7 -> Windows Server 2025 CORE
+    'W2025-CORE' {
+
+        # Set the Master Disk path name
+        $vmVhdParentDisk = '{0}\_OK_W2025-Core-Jan2025.vhdx' -f $MastersRoot
+
+        #Define memory params
+        $MemoryStartupBytes = 4096MB
+        $MemoryMinimum = 4096MB
+        $MemoryMaximum = 8192MB
+
+        #Define CPU counts
+        $ProcessorCount = 8
+
+    } #----- End of Option 7 -----
+
+    # Option 8 -> Windows Server 2025 GUI
+    'W2025-GUI' {
+
+        # Set the Master Disk path name
+        $vmVhdParentDisk = '{0}\_OK_W2025-GUI-Jan2025.vhdx' -f $MastersRoot
+
+        #Define memory params
+        $MemoryStartupBytes = 4096MB
+        $MemoryMinimum = 4096MB
+        $MemoryMaximum = 8192MB
+
+        #Define CPU counts
+        $ProcessorCount = 8
+
+    } #----- End of Option 8 -----
+
 } # --- End of switch ---
 
 
 
 #Create the new Differential Disk, having the master
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Creating the new differential disk...'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+       Creating the new differential disk...
+   ---------------------------------------------------------------
+' -ForegroundColor green
 
 # Ensure disk does not exists.
 $DiskExists = Get-VHD -Path $vmVhdNewDisk -ErrorAction SilentlyContinue
@@ -244,10 +276,11 @@ New-VHD @splat | Out-Null
 
 
 # Create the new VM
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Creating the ' $vmName ' virtual machine...'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message ('   ---------------------------------------------------------------
+       Creating the  {0}  virtual machine...
+   ---------------------------------------------------------------
+' -f $vmName) -ForegroundColor green
+
 $splat = @{
     Name         = $vmName
     Generation   = 2
@@ -263,19 +296,21 @@ $VM = New-VM @splat
 
 
 # Configure Integration Services
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Configuring Integration Services...'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+       Configuring Integration Services...
+   ---------------------------------------------------------------
+' -ForegroundColor green
+
 Get-VMIntegrationService -VMName $vmName | ForEach-Object { Enable-VMIntegrationService -Name $_.Name -VMName $vmName } | Out-Null
 
 
 
 # Configure Memory for the VM
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Configuring Memory...'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+       Configuring Memory...
+   ---------------------------------------------------------------
+' -ForegroundColor green
+
 $splat = @{
     VM                   = $VM
     DynamicMemoryEnabled = $true
@@ -289,10 +324,11 @@ Set-VMMemory @splat | Out-Null
 
 
 # Configure CPU for the VM
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Configuring CPU...'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+       Configuring CPU...
+   ---------------------------------------------------------------
+   ' -ForegroundColor green
+
 $splat = @{
     VMName   = $vmName
     Count    = $ProcessorCount
@@ -305,10 +341,11 @@ Set-VMProcessor @splat | Out-Null
 
 
 # Configure Memory for the VM
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Configuring other parameters...'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+       Configuring other parameters...
+   ---------------------------------------------------------------
+' -ForegroundColor green
+
 $splat = @{
     AutomaticCheckpointsEnabled = $false
     AutomaticStartAction        = 'StartIfRunning'
@@ -335,10 +372,10 @@ Enable-VMTPM -VM $vm
 
 
 #Mount the newly created VHDX file
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '    Mount and patch differential VHDX (inject unattended.xml file)'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+    Mount and patch differential VHDX (inject unattended.xml file)
+   ---------------------------------------------------------------
+' -ForegroundColor green
 
 # This is not working on Windows 11 October 2011 version
 #[System.String]$mount = (Mount-DiskImage -ImagePath $vmVhdNewDisk -StorageType VHDX -Access ReadWrite -PassThru | Get-Disk | Get-Partition | Get-Volume).DriveLetter
@@ -355,14 +392,14 @@ $Partitions = $MountedVhd | Get-Partition | Where-Object { $_.Type -eq 'Basic' }
 # Provide access to the mounted path (C:\VMs\TmpMount\)
 $Partitions | Add-PartitionAccessPath -AccessPath $TempMount
 
-
 # Generate static MAC address
 <#
-the number of dynamic MAC addresses that a Hyper-V host can produce is 256. Suppose we have the MAC address aa-bb-cc-dd-ee-ff.
+    the number of dynamic MAC addresses that a Hyper-V host can produce is 256.
+    Suppose we have the MAC address aa-bb-cc-dd-ee-ff.
 
-The first 3 octets (aa-bb-cc) refer to a Microsoft Unique Identifier that is used in all Hyper-V hosts (00: 15: 5D).
-The next 2 octets (dd-ee) are generated by the last two octets of the IP address that was first set up on the Hyper-V server.
-The last octet (ff) is generated from the range 0x0 â€“ 0xFF.
+    The first 3 octets (aa-bb-cc) refer to a Microsoft Unique Identifier that is used in all Hyper-V hosts (00: 15: 5D).
+    The next 2 octets (dd-ee) are generated by the last two octets of the IP address that was first set up on the Hyper-V server.
+    The last octet (ff) is generated from the range 0x0 â€“ 0xFF.
 #>
 
 # Microsoft Unique Identifier that is used in all Hyper-V hosts (00: 15: 5D)
@@ -472,7 +509,6 @@ if ($PC.ipv4 -or $PC.ipv6) {
 <component name="Microsoft-Windows-TCPIP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Interfaces>
                 <Interface wcm:action="add">
-                    <Identifier>$TmpMAC</Identifier>
                     <Ipv4Settings>
                         <DhcpEnabled>false</DhcpEnabled>
                         <Metric>10</Metric>
@@ -483,6 +519,7 @@ if ($PC.ipv4 -or $PC.ipv6) {
                         <Metric>10</Metric>
                         <RouterDiscoveryEnabled>false</RouterDiscoveryEnabled>
                     </Ipv6Settings>
+                    <Identifier>$TmpMAC</Identifier>
                     <UnicastIpAddresses>
                         <IpAddress wcm:action="add" wcm:keyValue="1">$($PC.IPv4)</IpAddress>
                         <IpAddress wcm:action="add" wcm:keyValue="2">$($PC.IPv6)</IpAddress>
@@ -666,7 +703,11 @@ $unattend = @"
         </component>
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <ComputerName>$VmName</ComputerName>
-            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <OEMInformation>
+                <SupportProvider>Eguibar IT</SupportProvider>
+                <SupportURL>https://www.EguibarIT.com</SupportURL>
+            </OEMInformation>
+            <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
             <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
             <TimeZone>Romance Standard Time</TimeZone>
         </component>
@@ -680,7 +721,9 @@ $unattend = @"
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}</CommandLine>
+                    <CommandLine>
+                        powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}
+                    </CommandLine>
                     <Description>Set Execution Policy to RemoteSigned</Description>
                     <Order>1</Order>
                     <RequiresUserInput>false</RequiresUserInput>
@@ -693,14 +736,14 @@ $unattend = @"
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Order>3</Order>
-                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell -Value 'pwsh.exe -NoExit'}</CommandLine>
-                    <Description>Make PowerShell the default shell</Description>
+                    <CommandLine>powercfg /h /type Off</CommandLine>
+                    <Description>Reduce hiberfile size</Description>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Order>4</Order>
-                    <CommandLine>powercfg /h /type Off</CommandLine>
-                    <Description>Reduce hiberfile size</Description>
+                    <CommandLine>cmd.exe /c winrm quickconfig -q -force</CommandLine>
+                    <Description>Enable WinRM</Description>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
             </FirstLogonCommands>
@@ -710,6 +753,8 @@ $unattend = @"
                 <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
                 <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
                 <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <SkipMachineOOBE>true</SkipMachineOOBE>
+                <SkipUserOOBE>true</SkipUserOOBE>
                 <ProtectYourPC>1</ProtectYourPC>
             </OOBE>
             <UserAccounts>
@@ -778,8 +823,13 @@ $unattend = @"
             <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
         </component>
         <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <EnableLUA>false</EnableLUA>
+            <EnableLUA>true</EnableLUA>
         </component>
+        <component language="neutral" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" versionScope="nonSxS" publicKeyToken="31bf3856ad364e35" processorArchitecture="amd64" name="Microsoft-Windows-DeviceGuard-Unattend">
+            <EnableVirtualizationBasedSecurity>1</EnableVirtualizationBasedSecurity>
+            <HypervisorEnforcedCodeIntegrity>1</HypervisorEnforcedCodeIntegrity>
+            <LsaCfgFlags>1</LsaCfgFlags>
+      </component>
     </settings>
 </unattend>
 "@
@@ -789,8 +839,11 @@ $unattend = @"
 Write-Verbose -Message 'Creating Unattend.xml file on new VM.'
 Set-Content -Value $unattend -Path ('{0}\Windows\Panther\unattend.xml' -f $TempMount)
 
-Write-Verbose -Message 'Copy of Unattend.xml file created on C:\VMs\Unattend-01-01-1600.xml'
-Set-Content -Value $unattend -Path ('C:\VMs\Unattend_{0}.xml' -f (Get-Date -Format 'dd-MMM-yyyy'))
+Write-Verbose -Message ('
+    Copy of Unattend.xml file created on
+    {0}' -f ('C:\VMs\Unattend_{0}_{1}.xml' -f $VmName, (Get-Date -Format 'dd-MMM-yyyy'))
+)
+Set-Content -Value $unattend -Path ('C:\VMs\Unattend_{0}_{1}.xml' -f $VmName, (Get-Date -Format 'dd-MMM-yyyy'))
 
 # Make windows to use the unattend.xml file
 #Use-WindowsUnattend -Path ('{0}:\' -f $mount.Trim()) -UnattendPath ('{0}:\Windows\Panther\unattend.xml' -f $mount.Trim()) -LogLevel WarningsInfo
@@ -838,10 +891,11 @@ If ($PC.Disks -eq 'Multiple-Disks') {
 }
 
 # Starting VM
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host '       Starting VM'
-Write-Host '   ---------------------------------------------------------------' -ForegroundColor green
-Write-Host
+Write-Host -Message '   ---------------------------------------------------------------
+       Starting VM
+   ---------------------------------------------------------------
+' -ForegroundColor green
+
 Start-VM -VM $VM
 Wait-VM -VM $vm -For Heartbeat
 
@@ -850,11 +904,12 @@ Wait-VM -VM $vm -For Heartbeat
 
 Wait-VM -VM $vm -For Heartbeat
 
-Write-Host '#########################################################################' -ForegroundColor green
-Write-Host '#                                                                       #' -ForegroundColor green
-Write-Host '#      Virtual Machine created. Now you can start playing with it.      #' -ForegroundColor green
-Write-Host '#                                                                       #' -ForegroundColor green
-Write-Host '#########################################################################' -ForegroundColor green
+Write-Host -Message '#########################################################################
+#                                                                       #
+#      Virtual Machine created. Now you can start playing with it.      #
+#                                                                       #
+#########################################################################
+' -ForegroundColor green
 
 
 
