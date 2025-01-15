@@ -2,7 +2,10 @@
 Param(
 
     # Param1 VM new name
-    [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+    [Parameter(Mandatory = $true,
+        ValueFromPipeline = $true,
+        ValueFromPipelineByPropertyName = $true,
+        ValueFromRemainingArguments = $false,
         HelpMessage = 'Name of the Virtual Machine. This name will be used for the VM name on Hyper-V and for the Windows host name.',
         Position = 0)]
     [ValidateNotNullOrEmpty()]
@@ -11,7 +14,10 @@ Param(
     $vmName,
 
     # Param2 integer representing the OS type of the VM
-    [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+    [Parameter(Mandatory = $true,
+        ValueFromPipeline = $true,
+        ValueFromPipelineByPropertyName = $true,
+        ValueFromRemainingArguments = $false,
         HelpMessage = 'Type of OS for the Virtual Machine.',
         Position = 1)]
     [ValidateNotNullOrEmpty()]
@@ -20,7 +26,10 @@ Param(
     $vmOsType,
 
     # Param3 Data File
-    [Parameter(Mandatory = $false, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false,
+    [Parameter(Mandatory = $false,
+        ValueFromPipeline = $true,
+        ValueFromPipelineByPropertyName = $true,
+        ValueFromRemainingArguments = $false,
         HelpMessage = 'File containing the configuration data of the new VM (just in case VM name exists)',
         Position = 2)]
     [PSDefaultValue(Help = 'Default Value is "C:\VMs\MainData.psd1"')]
@@ -137,6 +146,16 @@ If (-not $VmSwitch) {
 
 # Define the Root Folder where master disks reside
 $MastersRoot = 'C:\VMs\Masters'
+$RSATtools = @'
+<SynchronousCommand wcm:action="add">
+    <Order>5</Order>
+    <CommandLine>
+        powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Get-WindowsCapability -Name RSAT* -Online | Add-WindowsCapability -Online}
+    </CommandLine>
+    <Description>Install RSAT tools on GUI</Description>
+    <RequiresUserInput>false</RequiresUserInput>
+</SynchronousCommand>
+'@
 
 switch ($vmOsType) {
 
@@ -144,7 +163,6 @@ switch ($vmOsType) {
     'Win10' {
         # Set the Master Disk path name
         $vmVhdParentDisk = '{0}\_OK_Win10x64-Jan-2021.vhdx' -f $MastersRoot
-
     } #----- End of Option 1 -----
 
     # Option 2 -> Windows Server 2019 DesktopExperience
@@ -175,6 +193,9 @@ switch ($vmOsType) {
 
         #Define CPU counts
         $ProcessorCount = 4
+
+        # Remove RSAT tools because is core
+        $RSATtools = $null
 
     } #----- End of Option 3 -----
 
@@ -207,6 +228,9 @@ switch ($vmOsType) {
         #Define CPU counts
         $ProcessorCount = 8
 
+        # Remove RSAT tools because is core
+        $RSATtools = $null
+
     } #----- End of Option 5 -----
 
     # Option 6 -> Windows 11
@@ -230,6 +254,9 @@ switch ($vmOsType) {
 
         #Define CPU counts
         $ProcessorCount = 8
+
+        # Remove RSAT tools because is core
+        $RSATtools = $null
 
     } #----- End of Option 7 -----
 
@@ -721,11 +748,11 @@ $unattend = @"
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
+                    <Order>1</Order>
                     <CommandLine>
                         powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}
                     </CommandLine>
                     <Description>Set Execution Policy to RemoteSigned</Description>
-                    <Order>1</Order>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
@@ -746,6 +773,7 @@ $unattend = @"
                     <Description>Enable WinRM</Description>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
+                $RSATtools
             </FirstLogonCommands>
             <OOBE>
                 <HideEULAPage>true</HideEULAPage>
