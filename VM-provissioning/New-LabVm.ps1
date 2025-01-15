@@ -21,7 +21,7 @@ Param(
         HelpMessage = 'Type of OS for the Virtual Machine.',
         Position = 1)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('Win10', 'Win11', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE', 'W2025-CORE', 'W2025-GUI')]
+    [ValidateSet('Win11', 'W2k19', 'W2k19-CORE', 'W2022', 'W2022-CORE', 'W2025-CORE', 'W2025')]
     [string]
     $vmOsType,
 
@@ -159,10 +159,12 @@ $RSATtools = @'
 
 switch ($vmOsType) {
 
-    # Option 1 -> Windows 10
-    'Win10' {
+    # Option 1 -> Windows 11
+    'Win11' {
+
         # Set the Master Disk path name
-        $vmVhdParentDisk = '{0}\_OK_Win10x64-Jan-2021.vhdx' -f $MastersRoot
+        $vmVhdParentDisk = '{0}\_OK_Win11-Jan2025.vhdx' -f $MastersRoot
+
     } #----- End of Option 1 -----
 
     # Option 2 -> Windows Server 2019 DesktopExperience
@@ -233,15 +235,7 @@ switch ($vmOsType) {
 
     } #----- End of Option 5 -----
 
-    # Option 6 -> Windows 11
-    'Win11' {
-
-        # Set the Master Disk path name
-        $vmVhdParentDisk = '{0}\_OK_Win11-Dec2023.vhdx' -f $MastersRoot
-
-    } #----- End of Option 6 -----
-
-    # Option 7 -> Windows Server 2025 CORE
+    # Option 6 -> Windows Server 2025 CORE
     'W2025-CORE' {
 
         # Set the Master Disk path name
@@ -258,10 +252,10 @@ switch ($vmOsType) {
         # Remove RSAT tools because is core
         $RSATtools = $null
 
-    } #----- End of Option 7 -----
+    } #----- End of Option 6 -----
 
-    # Option 8 -> Windows Server 2025 GUI
-    'W2025-GUI' {
+    # Option 6 -> Windows Server 2025 GUI
+    'W2025' {
 
         # Set the Master Disk path name
         $vmVhdParentDisk = '{0}\_OK_W2025-GUI-Jan2025.vhdx' -f $MastersRoot
@@ -274,7 +268,7 @@ switch ($vmOsType) {
         #Define CPU counts
         $ProcessorCount = 8
 
-    } #----- End of Option 8 -----
+    } #----- End of Option 6 -----
 
 } # --- End of switch ---
 
@@ -763,7 +757,7 @@ $unattend = @"
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Order>3</Order>
-                    <CommandLine>powercfg /h /type Off</CommandLine>
+                    <CommandLine>powercfg /HIBERNATE OFF</CommandLine>
                     <Description>Reduce hiberfile size</Description>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
