@@ -150,7 +150,7 @@ $RSATtools = @'
 <SynchronousCommand wcm:action="add">
     <Order>5</Order>
     <CommandLine>
-        powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Get-WindowsCapability -Name RSAT* -Online | Add-WindowsCapability -Online}
+        powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Get-WindowsCapability -Name RSAT* -Online | Add-WindowsCapability -Online}
     </CommandLine>
     <Description>Install RSAT tools on GUI</Description>
     <RequiresUserInput>false</RequiresUserInput>
@@ -744,14 +744,14 @@ $unattend = @"
                 <SynchronousCommand wcm:action="add">
                     <Order>1</Order>
                     <CommandLine>
-                        powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}
+                        powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}
                     </CommandLine>
                     <Description>Set Execution Policy to RemoteSigned</Description>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Order>2</Order>
-                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -WindowStyle Hidden -Command {Enable-PSRemoting -SkipNetworkProfileCheck -Force}</CommandLine>
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Enable-PSRemoting -SkipNetworkProfileCheck -Force}</CommandLine>
                     <Description>Enable PsRemoting</Description>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
