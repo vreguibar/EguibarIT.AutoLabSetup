@@ -798,7 +798,7 @@ $unattend = @"
                 <LogonCount>5</LogonCount>
                 <Username>Administrator</Username>
             </AutoLogon>
-            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
             <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
             <TimeZone>Romance Standard Time</TimeZone>
         </component>
@@ -830,7 +830,7 @@ $unattend = @"
                 </OfflineAdministratorPassword>
             </OfflineUserAccounts>
             <ComputerName>$VmName</ComputerName>
-            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
+            <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
             <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
         </component>
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -847,11 +847,6 @@ $unattend = @"
         <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <EnableLUA>true</EnableLUA>
         </component>
-        <component language="neutral" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" versionScope="nonSxS" publicKeyToken="31bf3856ad364e35" processorArchitecture="amd64" name="Microsoft-Windows-DeviceGuard-Unattend">
-            <EnableVirtualizationBasedSecurity>1</EnableVirtualizationBasedSecurity>
-            <HypervisorEnforcedCodeIntegrity>1</HypervisorEnforcedCodeIntegrity>
-            <LsaCfgFlags>1</LsaCfgFlags>
-      </component>
     </settings>
 </unattend>
 "@

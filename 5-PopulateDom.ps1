@@ -682,8 +682,11 @@ New-SemiPrivilegedUser -SamAccountName jabink -AccountType T1 -AdminUsersDN $ItU
 New-SemiPrivilegedUser -SamAccountName chwook -AccountType T0 -AdminUsersDN $ItUsersAdminOuDn -PictureFolder 'C:\PsScripts\Pic' -Verbose
 
 # Add Tier0 admins to T0 AuditOnly Silo
+Grant-ADAuthenticationPolicySiloAccess -Identity 'T0_AuditingSilo' -Account (Get-AdUser 'chwook_T0')
 Set-ADUser -Identity 'chwook_T0' -AuthenticationPolicySilo 'T0_AuditingSilo'
+Grant-ADAuthenticationPolicySiloAccess -Identity 'T0_AuditingSilo' -Account (Get-ADUser 'davade_T0')
 Set-ADUser -Identity 'davade_T0' -AuthenticationPolicySilo 'T0_AuditingSilo'
+Grant-ADAuthenticationPolicySiloAccess -Identity 'T0_AuditingSilo' -Account (Get-ADUser 'yoda_T0')
 Set-ADUser -Identity 'yoda_T0' -AuthenticationPolicySilo 'T0_AuditingSilo'
 
 # Add to SG_Tier0Admins
@@ -761,6 +764,9 @@ New-ADComputer -Name 'Paw21' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.
 New-ADComputer -Name 'Paw22' -Path ('OU={0},OU={1},{2}' -f $confXML.n.Admin.OUs.ItPawT2OU.Name, $confXML.n.Admin.OUs.ItPawOU.Name, $ItAdminOuDn)
 
 # Add PAWs to Tier0 AuditOnly Silo
+Grant-ADAuthenticationPolicySiloAccess -Identity 'T0_AuditingSilo' -Account (Get-AdComputer 'Paw01')
+Grant-ADAuthenticationPolicySiloAccess -Identity 'T0_AuditingSilo' -Account (Get-ADComputer 'Paw02')
+
 Set-ADComputer -Identity 'Paw01' -AuthenticationPolicySilo 'T0_AuditingSilo'
 Set-ADComputer -Identity 'Paw02' -AuthenticationPolicySilo 'T0_AuditingSilo'
 ###############################################################################
