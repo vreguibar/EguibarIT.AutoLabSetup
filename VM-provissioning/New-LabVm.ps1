@@ -148,13 +148,11 @@ If (-not $VmSwitch) {
 $MastersRoot = 'C:\VMs\Masters'
 $RSATtools = @'
 <SynchronousCommand wcm:action="add">
-    <Order>5</Order>
-    <CommandLine>
-        powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Get-WindowsCapability -Name RSAT* -Online | Add-WindowsCapability -Online}
-    </CommandLine>
-    <Description>Install RSAT tools on GUI</Description>
-    <RequiresUserInput>false</RequiresUserInput>
-</SynchronousCommand>
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Get-WindowsCapability -Name RSAT* -Online | Add-WindowsCapability -Online}</CommandLine>
+                    <Description>Install RSAT tools on GUI</Description>
+                    <Order>5</Order>
+                    <RequiresUserInput>false</RequiresUserInput>
+                </SynchronousCommand>
 '@
 
 switch ($vmOsType) {
@@ -527,7 +525,10 @@ Write-Verbose -Message ('Ipv6 additional DNS:  {0}, {1} and {2}' -f $PC.DNS3IpV6
 # IP configuration section of the Unattend file
 if ($PC.ipv4 -or $PC.ipv6) {
     $UnattendIpConfig = @"
-<component name="Microsoft-Windows-TCPIP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<component name="Microsoft-Windows-TCPIP" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Interfaces>
                 <Interface wcm:action="add">
                     <Ipv4Settings>
@@ -562,7 +563,10 @@ if ($PC.ipv4 -or $PC.ipv6) {
                 </Interface>
             </Interfaces>
         </component>
-        <component name="Microsoft-Windows-DNS-Client" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-DNS-Client" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Interfaces>
                 <Interface wcm:action="add">
                     <Identifier>$TmpMAC</Identifier>
@@ -676,7 +680,10 @@ If ($VmName -ne ('DC1' -or 'DC5' -or 'DC9')) {
     Write-Verbose -Message ('Destination OU for {0} will be "{1}"' -f $VmName, $DestOU)
 
     $UnattendDomainJoin = @"
-<component name="Microsoft-Windows-UnattendedJoin" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<component name="Microsoft-Windows-UnattendedJoin" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Identification>
                 <Credentials>
                     <Domain>$($PC.DnsDomainName)</Domain>
@@ -702,82 +709,178 @@ If ($VmName -ne ('DC1' -or 'DC5' -or 'DC9')) {
 $unattend = @"
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
-    <servicing></servicing>
+    <settings pass="windowsPE">
+        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SetupUILanguage>
+                <UILanguage>en-US</UILanguage>
+            </SetupUILanguage>
+            <InputLocale>0c0a:0000040a</InputLocale>
+            <SystemLocale>es-ES</SystemLocale>
+            <UILanguageFallback>es-ES</UILanguageFallback>
+            <UserLocale>es-ES</UserLocale>
+            <UILanguage>en-US</UILanguage>
+        </component>
+        <component name="Microsoft-Windows-Setup" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <ComplianceCheck>
+                <DisplayReport>OnError</DisplayReport>
+            </ComplianceCheck>
+            <Display>
+                <HorizontalResolution>1920</HorizontalResolution>
+                <VerticalResolution>1080</VerticalResolution>
+            </Display>
+            <DynamicUpdate>
+                <Enable>true</Enable>
+            </DynamicUpdate>
+            <UserData>
+                <AcceptEula>true</AcceptEula>
+                <FullName>Vicente R. Eguibar</FullName>
+                <Organization>Eguibar IT</Organization>
+            </UserData>
+        </component>
+    </settings>
+    <settings pass="offlineServicing">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <OfflineUserAccounts>
+                <OfflineAdministratorPassword>
+                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYATwBmAGYAbABpAG4AZQBBAGQAbQBpAG4AaQBzAHQAcgBhAHQAbwByAFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                    <PlainText>false</PlainText>
+                </OfflineAdministratorPassword>
+            </OfflineUserAccounts>
+            <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
+            <RegisteredOwner>Vicente R. Eguibar</RegisteredOwner>
+            <ComputerName>$VmName</ComputerName>
+        </component>
+        <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <EnableLUA>false</EnableLUA>
+        </component>
+        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DisableAntiSpyware>false</DisableAntiSpyware>
+            <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
+        </component>
+    </settings>
     <settings pass="generalize">
-        <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <SkipRearm>1</SkipRearm>
         </component>
-        <component name="Microsoft-Windows-PnpSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-PnpSysprep" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
+            <RegisteredOwner>Vicente R. Eguibar</RegisteredOwner>
         </component>
     </settings>
     <settings pass="specialize">
-        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0c0a:0000040a</InputLocale>
             <SystemLocale>es-ES</SystemLocale>
-            <UILanguage>en-US</UILanguage>
             <UILanguageFallback>es-ES</UILanguageFallback>
             <UserLocale>es-ES</UserLocale>
+            <UILanguage>en-US</UILanguage>
         </component>
-        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <SkipAutoActivation>true</SkipAutoActivation>
         </component>
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <CEIPEnabled>0</CEIPEnabled>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <Display>
+                <HorizontalResolution>1920</HorizontalResolution>
+                <VerticalResolution>1080</VerticalResolution>
+            </Display>
             <ComputerName>$VmName</ComputerName>
-            <OEMInformation>
-                <SupportProvider>Eguibar IT</SupportProvider>
-                <SupportURL>https://www.EguibarIT.com</SupportURL>
-            </OEMInformation>
             <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
-            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
+            <RegisteredOwner>Vicente R. Eguibar</RegisteredOwner>
             <TimeZone>Romance Standard Time</TimeZone>
         </component>
-        <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <CEIPEnabled>0</CEIPEnabled>
+        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DisableAntiSpyware>false</DisableAntiSpyware>
+            <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
         </component>
         $UnattendIpConfig
         $UnattendDomainJoin
     </settings>
     <settings pass="oobeSystem">
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <Order>1</Order>
-                    <CommandLine>
-                        powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}
-                    </CommandLine>
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}</CommandLine>
                     <Description>Set Execution Policy to RemoteSigned</Description>
+                    <Order>1</Order>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <Order>2</Order>
                     <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Enable-PSRemoting -SkipNetworkProfileCheck -Force}</CommandLine>
                     <Description>Enable PsRemoting</Description>
+                    <Order>2</Order>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <Order>3</Order>
                     <CommandLine>powercfg /HIBERNATE OFF</CommandLine>
-                    <Description>Reduce hiberfile size</Description>
+                    <Description>Remove hibernation on the computer</Description>
+                    <Order>3</Order>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <Order>4</Order>
                     <CommandLine>cmd.exe /c winrm quickconfig -q -force</CommandLine>
                     <Description>Enable WinRM</Description>
+                    <Order>4</Order>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 $RSATtools
             </FirstLogonCommands>
             <OOBE>
                 <HideEULAPage>true</HideEULAPage>
-                <HideLocalAccountScreen>false</HideLocalAccountScreen>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
                 <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
                 <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
                 <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <ProtectYourPC>1</ProtectYourPC>
                 <SkipMachineOOBE>true</SkipMachineOOBE>
                 <SkipUserOOBE>true</SkipUserOOBE>
-                <ProtectYourPC>1</ProtectYourPC>
             </OOBE>
             <UserAccounts>
                 <AdministratorPassword>
@@ -787,65 +890,29 @@ $unattend = @"
             </UserAccounts>
             <Display>
                 <HorizontalResolution>1920</HorizontalResolution>
+                <RefreshRate>72</RefreshRate>
                 <VerticalResolution>1080</VerticalResolution>
             </Display>
-            <AutoLogon>
-                <Password>
-                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYAUABhAHMAcwB3AG8AcgBkAA==</Value>
-                    <PlainText>false</PlainText>
-                </Password>
-                <Enabled>true</Enabled>
-                <LogonCount>5</LogonCount>
-                <Username>Administrator</Username>
-            </AutoLogon>
             <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
-            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
+            <RegisteredOwner>Vicente R. Eguibar</RegisteredOwner>
             <TimeZone>Romance Standard Time</TimeZone>
         </component>
-        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0c0a:0000040a</InputLocale>
             <SystemLocale>es-ES</SystemLocale>
             <UILanguage>en-US</UILanguage>
             <UILanguageFallback>es-ES</UILanguageFallback>
             <UserLocale>es-ES</UserLocale>
         </component>
-        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <DisableAntiSpyware>false</DisableAntiSpyware>
             <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
-        </component>
-        <component name="Microsoft-Windows-International-Core" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <InputLocale>0c0a:0000040a</InputLocale>
-            <SystemLocale>es-ES</SystemLocale>
-            <UILanguage>es-ES</UILanguage>
-            <UserLocale>es-ES</UserLocale>
-            <UILanguageFallback>en-US</UILanguageFallback>
-        </component>
-    </settings>
-    <settings pass="offlineServicing">
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="wow64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <OfflineUserAccounts>
-                <OfflineAdministratorPassword>
-                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYATwBmAGYAbABpAG4AZQBBAGQAbQBpAG4AaQBzAHQAcgBhAHQAbwByAFAAYQBzAHMAdwBvAHIAZAA=</Value>
-                    <PlainText>false</PlainText>
-                </OfflineAdministratorPassword>
-            </OfflineUserAccounts>
-            <ComputerName>$VmName</ComputerName>
-            <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
-            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
-        </component>
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <OfflineUserAccounts>
-                <OfflineAdministratorPassword>
-                    <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYATwBmAGYAbABpAG4AZQBBAGQAbQBpAG4AaQBzAHQAcgBhAHQAbwByAFAAYQBzAHMAdwBvAHIAZAA=</Value>
-                    <PlainText>false</PlainText>
-                </OfflineAdministratorPassword>
-            </OfflineUserAccounts>
-            <ComputerName>$VmName</ComputerName>
-            <RegisteredOrganization>Eguibar Information Technology S.L.</RegisteredOrganization>
-            <RegisteredOwner>Vicente Rodriguez Eguibar</RegisteredOwner>
-        </component>
-        <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <EnableLUA>true</EnableLUA>
         </component>
     </settings>
 </unattend>
@@ -854,7 +921,8 @@ $unattend = @"
 # Copy the above unattend to VHDX C:\Windows\Panther\unattend.xml (Alternatively to C:\Windows\System32\Sysprep\Unattend.xml)
 # Set-Content -Value $unattend -Path ('{0}:\Windows\Panther\unattend.xml' -f $mount.Trim())
 Write-Verbose -Message 'Creating Unattend.xml file on new VM.'
-Set-Content -Value $unattend -Path ('{0}\Windows\Panther\unattend.xml' -f $TempMount)
+Set-Content -Value $unattend -Path ('{0}\Windows\Panther\unattend.xml' -f $TempMount) -Force
+Set-Content -Value $unattend -Path ('{0}\Windows\System32\Sysprep\unattend.xml' -f $TempMount) -Force
 
 Write-Verbose -Message ('
     Copy of Unattend.xml file created on
@@ -865,7 +933,10 @@ Set-Content -Value $unattend -Path ('C:\VMs\Unattend_{0}_{1}.xml' -f $VmName, (G
 # Make windows to use the unattend.xml file
 #Use-WindowsUnattend -Path ('{0}:\' -f $mount.Trim()) -UnattendPath ('{0}:\Windows\Panther\unattend.xml' -f $mount.Trim()) -LogLevel WarningsInfo
 Write-Verbose -Message 'Sealing image after apply Unattend.xml'
-Use-WindowsUnattend -Path $TempMount -UnattendPath ('{0}\Windows\Panther\unattend.xml' -f $TempMount) -LogLevel WarningsInfo
+Use-WindowsUnattend -Path $TempMount -UnattendPath ('{0}\Windows\System32\Sysprep\unattend.xml' -f $TempMount) -LogLevel WarningsInfo
+
+# Remove cached unattend.xml file from C:\WINDOWS\Panther folder
+Remove-Item -Path ('{0}\Windows\Panther\unattend.xml' -f $TempMount) -Force
 
 #Dismount Image
 Dismount-DiskImage -ImagePath $vmVhdNewDisk -StorageType VHDX
