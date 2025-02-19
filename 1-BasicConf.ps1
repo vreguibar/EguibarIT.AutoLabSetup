@@ -955,7 +955,7 @@ try {
 [String]$cmd = 'powercfg -h off'
 #Invoke-Expression -Command $cmd #| out-null
 #$sh.Run($cmd, 1, 'true')
-Start-Process -FilePath 'powercfg.exe' -Wait -Verb runas -ArgumentList @('-h', 'off' )
+Start-Process -FilePath 'powercfg.exe' -Wait -Verb runas -ArgumentList @('/HIBERNATE', 'off' )
 
 
 # Enable .Net 3.5 feature

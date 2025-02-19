@@ -371,6 +371,8 @@ ForEach ($item In $SvcAccList) {
 
     try {
         New-ADServiceAccount @params | Set-ADServiceAccount @ReplaceParams
+    } catch [Microsoft.ActiveDirectory.Management.ADIdentityAlreadyExistsException] {
+        Write-Verbose -Message ('Service Account {0} already exists' -f $item.Name)
     } catch {
         throw
     }

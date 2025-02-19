@@ -190,7 +190,12 @@ $ScriptBlock = {
 
     $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest
 
-    $TaskAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\CMD.exe' -Argument '/c "Start SConfig && Start CMD && Start PowerShell && Start pwsh.exe"' -WorkingDirectory $env:USERPROFILE
+    $Splat = @{
+        Execute          = 'C:\Windows\System32\CMD.exe'
+        Argument         = '/c "Start SConfig && Start CMD && Start PowerShell && Start pwsh.exe"'
+        WorkingDirectory = $env:USERPROFILE
+    }
+    $TaskAction = New-ScheduledTaskAction @Splat
 
     $TaskTrigger = New-ScheduledTaskTrigger -AtLogOn
 

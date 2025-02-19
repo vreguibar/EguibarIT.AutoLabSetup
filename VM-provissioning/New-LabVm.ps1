@@ -154,6 +154,14 @@ $RSATtools = @'
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
 '@
+$GUIprofiles = @'
+<SynchronousCommand wcm:action="add">
+                    <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -File c:\PsScripts\Set-ADAllAdminPictures.ps1</CommandLine>
+                    <Description>Pre-load profiles for defined existing users on GUI</Description>
+                    <Order>6</Order>
+                    <RequiresUserInput>false</RequiresUserInput>
+                </SynchronousCommand>
+'@
 
 switch ($vmOsType) {
 
@@ -197,6 +205,9 @@ switch ($vmOsType) {
         # Remove RSAT tools because is core
         $RSATtools = $null
 
+        # Remove Profiles pre-load because is core
+        $GUIprofiles = $null
+
     } #----- End of Option 3 -----
 
     # Option 4 -> Windows Server 2022 DesktopExperience
@@ -231,6 +242,9 @@ switch ($vmOsType) {
         # Remove RSAT tools because is core
         $RSATtools = $null
 
+        # Remove Profiles pre-load because is core
+        $GUIprofiles = $null
+
     } #----- End of Option 5 -----
 
     # Option 6 -> Windows Server 2025 CORE
@@ -249,6 +263,9 @@ switch ($vmOsType) {
 
         # Remove RSAT tools because is core
         $RSATtools = $null
+
+        # Remove Profiles pre-load because is core
+        $GUIprofiles = $null
 
     } #----- End of Option 6 -----
 
@@ -765,13 +782,6 @@ $unattend = @"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <EnableLUA>false</EnableLUA>
         </component>
-        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64"
-            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <DisableAntiSpyware>false</DisableAntiSpyware>
-            <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
-        </component>
     </settings>
     <settings pass="generalize">
         <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64"
@@ -830,13 +840,6 @@ $unattend = @"
             <RegisteredOwner>Vicente R. Eguibar</RegisteredOwner>
             <TimeZone>Romance Standard Time</TimeZone>
         </component>
-        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64"
-            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <DisableAntiSpyware>false</DisableAntiSpyware>
-            <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
-        </component>
         $UnattendIpConfig
         $UnattendDomainJoin
     </settings>
@@ -845,6 +848,16 @@ $unattend = @"
             publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
             xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <ProtectYourPC>1</ProtectYourPC>
+                <SkipMachineOOBE>true</SkipMachineOOBE>
+                <SkipUserOOBE>true</SkipUserOOBE>
+            </OOBE>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>powershell -NoLogo -sta -NoProfile -NoInteractive -Command {Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force}</CommandLine>
@@ -865,23 +878,14 @@ $unattend = @"
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c winrm quickconfig -q -force</CommandLine>
+                    <CommandLine>winrm quickconfig -q -force</CommandLine>
                     <Description>Enable WinRM</Description>
                     <Order>4</Order>
                     <RequiresUserInput>false</RequiresUserInput>
                 </SynchronousCommand>
                 $RSATtools
+                $GUIprofiles
             </FirstLogonCommands>
-            <OOBE>
-                <HideEULAPage>true</HideEULAPage>
-                <HideLocalAccountScreen>true</HideLocalAccountScreen>
-                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
-                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
-                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
-                <ProtectYourPC>1</ProtectYourPC>
-                <SkipMachineOOBE>true</SkipMachineOOBE>
-                <SkipUserOOBE>true</SkipUserOOBE>
-            </OOBE>
             <UserAccounts>
                 <AdministratorPassword>
                     <Value>UABAAHMAcwB3AG8AcgBkACAAMQAyADMANAA1ADYAQQBkAG0AaQBuAGkAcwB0AHIAYQB0AG8AcgBQAGEAcwBzAHcAbwByAGQA</Value>
@@ -890,7 +894,6 @@ $unattend = @"
             </UserAccounts>
             <Display>
                 <HorizontalResolution>1920</HorizontalResolution>
-                <RefreshRate>72</RefreshRate>
                 <VerticalResolution>1080</VerticalResolution>
             </Display>
             <RegisteredOrganization>Eguibar IT</RegisteredOrganization>
@@ -906,13 +909,6 @@ $unattend = @"
             <UILanguage>en-US</UILanguage>
             <UILanguageFallback>es-ES</UILanguageFallback>
             <UserLocale>es-ES</UserLocale>
-        </component>
-        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64"
-            publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-            xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <DisableAntiSpyware>false</DisableAntiSpyware>
-            <EnableRemoteManagedDefaults>true</EnableRemoteManagedDefaults>
         </component>
     </settings>
 </unattend>
